@@ -1,0 +1,103 @@
+﻿<UserControl x:Class="PlateWorld.Views.Pages.PlateEditorPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:parts="clr-namespace:PlateWorld.Views.Parts" xmlns:plate="clr-namespace:PlateWorld.Views.Parts.Plate"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <parts:NavigationBar Grid.Row="0" />
+
+
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border  Grid.Row="0" BorderThickness="0,0,0,2" Background="#88A7C09E">
+                <TextBlock Text="Plate Editor" FontSize="18"
+                           Style="{DynamicResource LargeTextBlock}" />
+            </Border>
+
+            <Grid Grid.Row="1" Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+
+                <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" Width="2" ResizeBehavior="PreviousAndNext"  
+                    ResizeDirection="Columns" Background="#4CE41818"/>
+
+                <StackPanel Grid.Column="0">
+                    
+                    <TextBlock Text="Samples" Style="{DynamicResource MediumTextBlock}" />
+
+                    <!--<DataGrid ItemsSource="{Binding Plates}" SelectionMode="Extended"
+                      SelectedItem="{Binding SelectedPlate, Mode=TwoWay}"
+                      AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Width="200" Binding="{Binding Name}" FontSize="16"/>
+                            <DataGridTextColumn Header="Rows" Width="140" Binding="{Binding WellsPerRow}" FontSize="16"/>
+                            <DataGridTextColumn Header="Cols" Width="140" Binding="{Binding WellsPerColumn}" FontSize="16"/>
+                            <DataGridTextColumn Header="Used Wells" Width="*" Binding="{Binding UsedWells}" FontSize="16" />
+                        </DataGrid.Columns>
+                    </DataGrid>-->
+                    
+                </StackPanel>
+
+                <DockPanel LastChildFill="True" Grid.Column="2" >
+
+                    <HeaderedContentControl DockPanel.Dock="Top"
+                        HorizontalAlignment="Center">
+                        <HeaderedContentControl.Header>
+                            <TextBlock Text="Name" 
+                    Style="{DynamicResource SmallTextBlock}" />
+                        </HeaderedContentControl.Header>
+                        <TextBox Text="{Binding PlateName, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{DynamicResource MediumTextBox}" />
+                    </HeaderedContentControl>
+                    
+ 
+                    <StackPanel DockPanel.Dock="Bottom">
+                        <StackPanel Margin="0 20 0 0"
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Center">
+                            <Button 
+                                Command="{Binding SavePlateCommand}"
+                                Content="Save" 
+                                CommandParameter="{Binding Mode=OneWay}" 
+                                Style="{DynamicResource LocalButton}" />
+
+                            <Button
+                                Command="{Binding CancelCommand}"
+                                Content="Cancel" 
+                                Style="{DynamicResource LocalButton}" />
+
+                        </StackPanel>
+                        <TextBlock 
+                           Text= "{Binding ValidationResult}"
+                           Style="{DynamicResource ErrorTextBlock}" />
+                    </StackPanel>
+                    <Viewbox Margin="10">
+                        <plate:PlateControl DataContext ="{Binding PlateVm}"/>
+                    </Viewbox>
+                </DockPanel>
+                
+            </Grid>
+            
+            
+        </Grid>
+
+    </Grid>
+
+</UserControl>

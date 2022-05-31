@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="PlateWorld.Views.Pages.NewPlatePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:vv="clr-namespace:PlateWorld.Mvvm.Validation;assembly=PlateWorld.Mvvm" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="400">
+
+    <StackPanel>
+
+        <TextBlock Text="New Plate"
+                   Style="{DynamicResource LargeTextBlock}" />
+
+        <HeaderedContentControl>
+            <HeaderedContentControl.Header>
+                <TextBlock Text="Name" 
+                    Style="{DynamicResource SmallTextBlock}" />
+            </HeaderedContentControl.Header>
+            <TextBox Text="{Binding PlateName, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{DynamicResource MediumTextBox}" />
+        </HeaderedContentControl>
+
+        <HeaderedContentControl>
+            <HeaderedContentControl.Header>
+                <TextBlock Text="Row count"
+                    Style="{DynamicResource SmallTextBlock}" />
+            </HeaderedContentControl.Header>
+            <TextBox Text="{Binding RowCount, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{DynamicResource MediumTextBox}" />
+        </HeaderedContentControl>
+
+        <HeaderedContentControl>
+            <HeaderedContentControl.Header>
+                <TextBlock Text="Column count"
+                    Style="{DynamicResource SmallTextBlock}" />
+            </HeaderedContentControl.Header>
+            <TextBox Text="{Binding ColCount, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{DynamicResource MediumTextBox}" />
+        </HeaderedContentControl>
+
+        <StackPanel
+                Margin="0 20 0 0"
+                Orientation="Horizontal" 
+                HorizontalAlignment="Center">
+            <Button 
+                    Command="{Binding SubmitCommand}"
+                    Content="Submit" 
+                    CommandParameter="{Binding Mode=OneWay}" 
+                    Style="{DynamicResource NavButton}" />
+
+            <Button
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel" 
+                    Style="{DynamicResource NavButton}" />
+
+        </StackPanel>
+
+        <TextBlock Width="180" 
+                   Height="40"
+                   Text="{Binding ValidationResult}" 
+                   Style="{DynamicResource ErrorTextBlock}" />
+
+    </StackPanel>
+
+</UserControl>

@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="PongkiAndRudi.PNG" />
+    <None Remove="Views\Pages\PongkiAndRudi.PNG" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlateWorld.Mvvm\PlateWorld.Mvvm.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="PongkiAndRudi.PNG">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Pages\PongkiAndRudi.PNG" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\Pages\NewPlatePage.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

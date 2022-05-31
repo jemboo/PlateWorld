@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="PlateWorld.Views.Parts.Plate.PlateMarginControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vmps="clr-namespace:PlateWorld.ViewModels.PlateParts"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vmps:PlateMarginVmD, IsDesignTimeCreatable=True}"
+             d:Width="100" d:Height="100">
+    <UserControl.Resources>
+        <DataTemplate x:Key="ListBoxItemTemplate1">
+            <Grid Width="30" Height="30">
+                <TextBlock Text="{Binding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <Grid>
+
+        <ListBox ItemTemplate="{DynamicResource ListBoxItemTemplate1}" 
+                 ItemsSource="{Binding Labels, Mode=OneWay}" 
+                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                 ScrollViewer.VerticalScrollBarVisibility="Hidden">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="{Binding Orientation}"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+        </ListBox>
+            
+    </Grid>
+</UserControl>

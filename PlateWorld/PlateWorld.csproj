@@ -8,12 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="PongkiAndRudi.PNG" />
-    <None Remove="Views\Pages\PongkiAndRudi.PNG" />
+    <Compile Remove="ViewModels\NavigationBarViewModel.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="pongki.png" />
+    <None Remove="Views\Pages\PongkiAndRudi.PNG" />
+    <None Remove="Views\Parts\Plate\pongki.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="gong-wpf-dragdrop" Version="3.1.1" />
     <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,10 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="PongkiAndRudi.PNG">
+    <Resource Include="Views\Pages\pongki.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Pages\PongkiAndRudi.PNG" />
+    <Resource Include="Views\Parts\Plate\pongki.png" />
   </ItemGroup>
 
   <ItemGroup>

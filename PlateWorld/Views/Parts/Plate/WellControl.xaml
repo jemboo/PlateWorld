@@ -5,8 +5,62 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="btVConv"/>
+    </UserControl.Resources>
+    
 
-    <Grid>
+    <Border>
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="Transparent"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush">
+                    <Setter.Value>
+                        <SolidColorBrush Color="DarkGray"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="#8FFF"/>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="BorderBrush">
+                            <Setter.Value>
+                                <SolidColorBrush Color="White"/>
+                            </Setter.Value>
+                        </Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
 
-    </Grid>
+        <Grid Width="28" Height="28">
+
+            <Ellipse Width="26" Height="26" Stroke="DarkGray"/>
+
+            <Border Visibility="{Binding IsSelected, Converter={StaticResource btVConv}}">
+                <Border.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#5FFF" Offset="1" />
+                        <GradientStop Color="#CFFF" Offset="0"/>
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+            
+            <Ellipse Width="24" Height="24" Fill="#A88F"
+                     Visibility="{Binding ContainsSample, Converter={StaticResource btVConv}}" />
+
+            <TextBlock Text="{Binding Text}" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
+        </Grid>
+
+    </Border>
 </UserControl>

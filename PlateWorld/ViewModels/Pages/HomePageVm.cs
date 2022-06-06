@@ -13,23 +13,23 @@ namespace PlateWorld.ViewModels.Pages
         public HomePageVm(
                 NavigationStore navigationStore, 
                 ModalNavigationStore modalNavigationStore,
-                DataStore.Plates? plates)
+                DataStore.PlateStore? plates)
         {
             NavigationStore = navigationStore;
             ModalNavigationStore = modalNavigationStore;
             PlateStore = plates;
         }
-        DataStore.Plates? PlateStore { get; }
+        DataStore.PlateStore? PlateStore { get; }
 
-        #region NavigateHomeCommand
+        #region NavHomeCommand
 
-        RelayCommand? _navigateHomeCommand;
-        public ICommand NavigateHomeCommand
+        RelayCommand? _NavHomeCommand;
+        public ICommand NavHomeCommand
         {
             get
             {
                 Action aa = () => { };
-                return _navigateHomeCommand ?? (_navigateHomeCommand = 
+                return _NavHomeCommand ?? (_NavHomeCommand = 
                     new RelayCommand(
                             aa,
                             () => false
@@ -37,13 +37,13 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion // NavigateHomeCommand
+        #endregion // NavHomeCommand
 
 
-        #region NavigateNewPlateCommand
+        #region NavNewPlateCommand
 
-        RelayCommand? _navigateNewPlateCommand;
-        public ICommand NavigateNewPlateCommand
+        RelayCommand? _NavNewPlateCommand;
+        public ICommand NavNewPlateCommand
         {
             get
             {
@@ -53,7 +53,7 @@ namespace PlateWorld.ViewModels.Pages
                                        ModalNavigationStore,
                                        PlateStore, NewPlateCancelCommand);
                 };
-                return _navigateNewPlateCommand ?? (_navigateNewPlateCommand =
+                return _NavNewPlateCommand ?? (_NavNewPlateCommand =
                     new RelayCommand(
                                 aa,
                                 () => true
@@ -61,26 +61,24 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion // NavigateNewPlateCommand
+        #endregion // NavNewPlateCommand
 
 
-        #region NavigatePlateEditorCommand
+        #region NavAddSamplesToPlateCommand
 
-        RelayCommand? _navigatePlateEditorCommand;
-        public ICommand NavigatePlateEditorCommand
+        RelayCommand? _navAddSamplesToPlateCommand;
+        public ICommand NavAddSamplesToPlateCommand
         {
             get
             {
                 Action aa = () => { };
-                return _navigatePlateEditorCommand ?? 
-                    (_navigatePlateEditorCommand = 
-                    new RelayCommand( aa,
-                            () => false
-                            ));
+                return _navAddSamplesToPlateCommand ?? 
+                    (_navAddSamplesToPlateCommand = 
+                    new RelayCommand( aa, () => false ));
             }
         }
 
-        #endregion // NavigatePlateEditorCommand
+        #endregion // NavAddSamplesToPlateCommand
 
 
         #region NewPlateCancelCommand
@@ -104,19 +102,19 @@ namespace PlateWorld.ViewModels.Pages
         #endregion // NewPlateSubmitCommand
 
 
-        #region NavigatePlateListCommand
+        #region NavAllPlatesCommand
 
-        RelayCommand? _navigatePlateListCommand;
-        public ICommand NavigatePlateListCommand
+        RelayCommand? _NavAllPlatesCommand;
+        public ICommand NavAllPlatesCommand
         {
             get
             {
                 Action aa = () => {
                     NavigationStore.CurrentViewModel =
-                    new PlateListPageVm(NavigationStore, 
+                    new AllPlatesPageVm(NavigationStore, 
                     ModalNavigationStore, PlateStore, null);
                 };
-                return _navigatePlateListCommand ?? (_navigatePlateListCommand = 
+                return _NavAllPlatesCommand ?? (_NavAllPlatesCommand = 
                     new RelayCommand(
                             aa,
                             () => true
@@ -124,7 +122,46 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion // NavigatePlateListCommand
+        #endregion // NavAllPlatesCommand
+
+
+        #region NavAllSamplesCommand
+
+        RelayCommand? _navAllSamplesCommand;
+        public ICommand? NavAllSamplesCommand
+        {
+            get
+            {
+                Action aa = () => { };
+                return _navAllSamplesCommand ?? (_navAllSamplesCommand =
+                    new RelayCommand(
+                            aa,
+                            () => false
+                            ));
+            }
+        }
+
+        #endregion // NavAllSamplesCommand
+
+
+        #region NavNewSamplesCommand
+
+        RelayCommand? _navNewSamplesCommand;
+        public ICommand? NavNewSamplesCommand
+        {
+            get
+            {
+                Action aa = () => { };
+                return _navNewSamplesCommand ?? (_navNewSamplesCommand =
+                    new RelayCommand(
+                            aa,
+                            () => false
+                            ));
+            }
+        }
+
+        #endregion // NavNewSamplesCommand
+
 
     }
 }

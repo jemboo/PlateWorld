@@ -15,22 +15,47 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "30"/>
-            <ColumnDefinition Width = "Auto"/>
+            <ColumnDefinition Width = "35"/>
+            <ColumnDefinition Width = "*"/>
+            <ColumnDefinition Width = "10"/>
         </Grid.ColumnDefinitions>
+        <Border Grid.ColumnSpan="3" Grid.RowSpan="3" CornerRadius="4" 
+                Background="#F888" BorderBrush="DarkGray" BorderThickness="1" Margin="1,1,0,0"/>
 
-        <views:PlateMarginControl Grid.Row="0" 
+        <Image Width="32" Height="32" Source="/Views/Parts/Plate/pongki.png" 
+               HorizontalAlignment="Center" 
+               VerticalAlignment="Center" Margin="3,3,0,0"/>
+        <views:PlateMarginControl x:Name="ColHdr"
+                                  Grid.Row="0"
                                   Grid.Column="1" 
-                                  DataContext="{Binding HorizontalMarginVm, Mode=OneWay}"/>
-        <views:PlateMarginControl Grid.Row="1" Grid.Column="0" 
-                                  DataContext="{Binding VerticalMarginVm, Mode=OneWay}" />
-        
-        <views:WellBlockControl Grid.Row="1" Grid.Column="1"
-                 Width="{Binding WellsPerRow, ConverterParameter=30, Converter={StaticResource mConv}, Mode=OneWay}"
-                 Height="{Binding WellsPerColumn, ConverterParameter=30, Converter={StaticResource mConv}, Mode=OneWay}"/>
+                                  DataContext="{Binding HorizontalMarginVm, Mode=OneWay}" 
+                                  RenderTransformOrigin="0.5,0.5" 
+                                  Width="{Binding Count, ConverterParameter=32, Converter={StaticResource mConv}}">
+            <views:PlateMarginControl.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform Y="0"/>
+                </TransformGroup>
+            </views:PlateMarginControl.RenderTransform>
+        </views:PlateMarginControl>
+        <views:PlateMarginControl x:Name="RowHdr"
+                                  Grid.Row="1"
+                                  Grid.Column="0" 
+                                  DataContext="{Binding VerticalMarginVm, Mode=OneWay}" 
+                                  Height="{Binding Count, ConverterParameter=32, Converter={StaticResource mConv}}">
+            <views:PlateMarginControl.RenderTransform>
+                <TransformGroup>
+                    <TranslateTransform X="0"/>
+                </TransformGroup>
+            </views:PlateMarginControl.RenderTransform>
+        </views:PlateMarginControl>
+
+        <views:WellBlockControl Grid.Row="1" Grid.Column="1" 
+                                Width="{Binding ActualWidth, ElementName=ColHdr, Mode=OneWay}" 
+                                Height="{Binding ActualHeight, ElementName=RowHdr, Mode=OneWay}"/>
     </Grid>
 </UserControl>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.Linq;
 
 namespace PlateWorld.Models
@@ -12,16 +13,16 @@ namespace PlateWorld.Models
         {
             Id = id;
             Name = name;
-            WellsPerRow = wellsPerRow;
-            WellsPerColumn = wellsPerColumn;
-            Wells = wells.ToArray();
+            ColumnCount = wellsPerRow;
+            RowCount = wellsPerColumn;
+            Wells = PlateExt.WellSet(ColumnCount, RowCount).ToArray();
         }
         public int Id { get; }
         public string Name { get; }
 
-        public int WellsPerRow { get; set; }
+        public int ColumnCount { get; set; }
 
-        public int WellsPerColumn { get; set; }
+        public int RowCount { get; set; }
 
         public Well[] Wells { get; set; }
 
@@ -32,6 +33,11 @@ namespace PlateWorld.Models
                 return Wells.Where(w => w.Sample != null).Count();
             }
         }
+
+        public static Plate Empty
+        {
+            get { return new Plate(0, string.Empty, 0, 0, new List<Well>());  }
+        }
     }
 
     public static class PlateExt
@@ -40,8 +46,8 @@ namespace PlateWorld.Models
         {
             return new Plate(id:plate.Id, 
                 name: newName, 
-                wellsPerRow:plate.WellsPerRow, 
-                wellsPerColumn:plate.WellsPerColumn,
+                wellsPerRow:plate.ColumnCount, 
+                wellsPerColumn:plate.RowCount,
                 wells: plate.Wells);
         }
         public static Plate NewRowCount(this Plate plate, int newRowCount)
@@ -49,18 +55,18 @@ namespace PlateWorld.Models
             return new Plate(
                 id: plate.Id, 
                 name: plate.Name, 
-                wellsPerRow: plate.WellsPerRow, 
-                wellsPerColumn: plate.WellsPerColumn,
-                wells: WellSet(newRowCount, plate.WellsPerColumn).ToArray());
+                wellsPerRow: plate.ColumnCount, 
+                wellsPerColumn: plate.RowCount,
+                wells: WellSet(newRowCount, plate.RowCount).ToArray());
         }
         public static Plate NewColCount(this Plate plate, int newColCount)
         {
             return new Plate(
                 id: plate.Id, 
                 name: plate.Name, 
-                wellsPerRow: plate.WellsPerRow, 
-                wellsPerColumn: plate.WellsPerColumn,
-                wells: WellSet(plate.WellsPerRow, newColCount).ToArray());
+                wellsPerRow: plate.ColumnCount, 
+                wellsPerColumn: plate.RowCount,
+                wells: WellSet(plate.ColumnCount, newColCount).ToArray());
         }
 
         public static Plate MakePlate(string plateName, int rowCount, int colCount)
@@ -80,7 +86,10 @@ namespace PlateWorld.Models
             {
                 for(var j=0; j< cols; j++)
                 {
-                    yield return new Well(row: i + 1, column: j + 1);
+                    var samp = (((i + j) % 2) == 1) ? 
+                        new Sample(Guid.NewGuid(), "Name", Enumerable.Empty<SampleProperty>()) : 
+                        null;
+                    yield return new Well(row: i + 1, column: j + 1, sample: samp);
                 }
             }
         }

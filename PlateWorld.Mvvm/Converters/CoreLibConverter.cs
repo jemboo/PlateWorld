@@ -183,7 +183,7 @@ namespace PlateWorld.Mvvm.Converters
                     val = 1;
                 }
                 var fact = double.Parse((string)parameter);
-                return val * fact;
+                return val * fact + 4;
             }
             catch
             {

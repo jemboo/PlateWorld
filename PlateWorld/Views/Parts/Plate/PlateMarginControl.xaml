@@ -5,22 +5,32 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vmps="clr-namespace:PlateWorld.ViewModels.PlateParts"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=vmps:PlateMarginVmD, IsDesignTimeCreatable=True}"
-             d:Width="100" d:Height="100">
+             d:DataContext="{d:DesignInstance Type=vmps:PlateMarginVmD, IsDesignTimeCreatable=True}">
     <UserControl.Resources>
         <DataTemplate x:Key="ListBoxItemTemplate1">
             <Grid Width="30" Height="30">
-                <TextBlock Text="{Binding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding}" 
+                           Foreground="DarkGray"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"/>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
     
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <ListBox ItemTemplate="{DynamicResource ListBoxItemTemplate1}" 
+        <ListBox ItemContainerStyle="{DynamicResource WellItemContainerStyle}" 
+                 ItemTemplate="{DynamicResource ListBoxItemTemplate1}" 
                  ItemsSource="{Binding Labels, Mode=OneWay}" 
                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
-                 ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                 ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="{x:Null}" BorderBrush="{x:Null}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="{Binding Orientation}"/>

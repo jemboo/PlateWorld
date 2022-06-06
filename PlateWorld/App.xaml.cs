@@ -13,12 +13,12 @@ namespace PlateWorld
         MainWindow _mainWindow; 
         NavigationStore _navigationStore;
         ModalNavigationStore _modalNavigationStore;
-        Plates _plates;
+        PlateStore _plates;
         public App()
         {
             _navigationStore = new NavigationStore();
             _modalNavigationStore = new ModalNavigationStore();
-            _plates = new Plates(); 
+            _plates = new PlateStore(); 
             var mainVm = new MainViewModel(_navigationStore, _modalNavigationStore);
             var startingVm = new HomePageVm(_navigationStore, _modalNavigationStore, _plates);
             _mainWindow = new MainWindow();

@@ -10,15 +10,13 @@ namespace PlateWorld.Models
     {
         public Well(int row, int column, Sample sample = null)
         {
-            Row = row;
-            Column = column;
+            WellCoords = new WellCoords(row, column);
             Sample = sample;
         }
 
-        public Sample Sample { get; }
-        public int Row { get; }
-        public int Column { get; }
+        public Sample Sample { get; set; }
 
+        public WellCoords WellCoords { get; set; }
     }
 
     public static class WellExt

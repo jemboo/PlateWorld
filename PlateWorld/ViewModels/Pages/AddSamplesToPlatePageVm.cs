@@ -1,30 +1,61 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PlateWorld.Models;
+using PlateWorld.Models.TestData;
 using PlateWorld.Mvvm.Stores;
 using PlateWorld.ViewModels.PlateParts;
 using System;
+using System.Linq;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
+using PlateWorld.ViewModels.DragDrop;
 
 namespace PlateWorld.ViewModels.Pages
 {
-    public class PlateEditorPageVm : ObservableObject
+    public class AddSamplesToPlatePageVm : ObservableObject
     {
         NavigationStore NavigationStore { get; }
         ModalNavigationStore ModalNavigationStore { get; }
-        public PlateEditorPageVm(NavigationStore navigationStore, 
+
+        public SamplesDragHandler SamplesDragHandler { get; set; } 
+            = new SamplesDragHandler();
+
+        public SamplesDropHandler SamplesDropHandler { get; set; } 
+            = new SamplesDropHandler();
+
+        public AddSamplesToPlatePageVm(NavigationStore navigationStore, 
                 ModalNavigationStore modalNavigationStore,
-                DataStore.Plates? plates, Plate? plate)
+                DataStore.PlateStore plateStore, Plate? plate)
         {
             NavigationStore = navigationStore;
             ModalNavigationStore = modalNavigationStore;
-            PlateStore = plates;
+            PlateStore = plateStore;
             Plate = plate;
-            PlateVm = new PlateVm(Plate);
             _plateName = plate.Name;
             _validationResult = String.Empty;
+
+            if (Plate != null)
+            {
+                PlateVm = new PlateVm(Plate);
+                if (plate.RowCount > 20)
+                {
+                    Zoom = 1;
+                }
+                else Zoom = 2;
+            }
+            else
+            {
+                Zoom = 2;
+            }
+
+            var samples = AnimalThemedContainerExt.MakeSamples(123, 100)
+                            .ToArray();
+            var dex = 1;
+            var sampleVms = samples.Select(s => s.FromAtc($"Sample {dex++}")
+                            .ToVm());
+            _sampleVms = new ObservableCollection<SampleVm>(sampleVms);
         }
-        DataStore.Plates? PlateStore { get; }
+        DataStore.PlateStore PlateStore { get; }
 
         Plate? Plate { get; }
 
@@ -38,6 +69,22 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
+        private double _zoom;
+        public double Zoom
+        {
+            get => _zoom;
+            set
+            {
+                SetProperty(ref _zoom, value);
+            }
+        }
+
+
+        ObservableCollection<SampleVm> _sampleVms;
+        public ObservableCollection<SampleVm> SampleVms
+        {
+            get { return _sampleVms; }
+        }
 
         #region SubmitCommand
 
@@ -48,7 +95,7 @@ namespace PlateWorld.ViewModels.Pages
             {
                 Action aa = () =>
                 {
-                    NavigationStore.CurrentViewModel = new PlateEditorPageVm(
+                    NavigationStore.CurrentViewModel = new AddSamplesToPlatePageVm(
                         NavigationStore, ModalNavigationStore, PlateStore, Plate);
                 };
                 return _cancelCommand ??
@@ -73,9 +120,9 @@ namespace PlateWorld.ViewModels.Pages
                 SetProperty(ref _plateName, value);
                 _savePlateCommand?.NotifyCanExecuteChanged();
                 _cancelCommand?.NotifyCanExecuteChanged();
-                _navigateHomeCommand.NotifyCanExecuteChanged();
-                _navigateNewPlateCommand.NotifyCanExecuteChanged();
-                _navigatePlateListCommand.NotifyCanExecuteChanged();
+                _NavHomeCommand.NotifyCanExecuteChanged();
+                _NavNewPlateCommand.NotifyCanExecuteChanged();
+                _NavAllPlatesCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -100,7 +147,7 @@ namespace PlateWorld.ViewModels.Pages
                 Action aa = () => {
                     ModalNavigationStore.CurrentViewModel = null;
                     NavigationStore.CurrentViewModel =
-                    new PlateEditorPageVm(NavigationStore,
+                    new AddSamplesToPlatePageVm(NavigationStore,
                     ModalNavigationStore, PlateStore, Plate);
                 };
                 return _newPlateCancelCommand ?? (_newPlateCancelCommand =
@@ -124,9 +171,8 @@ namespace PlateWorld.ViewModels.Pages
                 Action aa = () =>
                 {
                     var newPlate = Plate.NewName(newName: PlateName);
-                    PlateStore.data.Remove(Plate.Name);
-                    PlateStore.data[newPlate.Name] = newPlate;
-                    NavigationStore.CurrentViewModel = new PlateEditorPageVm(
+                    PlateStore.AddPlate(newPlate);
+                    NavigationStore.CurrentViewModel = new AddSamplesToPlatePageVm(
                         NavigationStore, ModalNavigationStore, PlateStore, newPlate);
                 };
                 return _savePlateCommand ?? 
@@ -134,13 +180,13 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion // NavigateHomeCommand
+        #endregion // NavHomeCommand
 
 
-        #region NavigateHomeCommand
+        #region NavHomeCommand
 
-        RelayCommand? _navigateHomeCommand;
-        public ICommand NavigateHomeCommand
+        RelayCommand? _NavHomeCommand;
+        public ICommand NavHomeCommand
         {
             get
             {
@@ -150,18 +196,18 @@ namespace PlateWorld.ViewModels.Pages
                     new HomePageVm(NavigationStore, 
                     ModalNavigationStore, PlateStore);
                 };
-                return _navigateHomeCommand ?? (_navigateHomeCommand =
+                return _NavHomeCommand ?? (_NavHomeCommand =
                     new RelayCommand( aa, () => !EditsWereMade() ));
             }
         }
 
-        #endregion // NavigateHomeCommand
+        #endregion // NavHomeCommand
 
 
-        #region NavigateNewPlateCommand
+        #region NavNewPlateCommand
 
-        RelayCommand? _navigateNewPlateCommand;
-        public ICommand NavigateNewPlateCommand
+        RelayCommand? _NavNewPlateCommand;
+        public ICommand NavNewPlateCommand
         {
             get
             {
@@ -171,7 +217,7 @@ namespace PlateWorld.ViewModels.Pages
                     new NewPlatePageVm(NavigationStore, ModalNavigationStore, 
                                 PlateStore, NewPlateCancelCommand);
                 };
-                return _navigateNewPlateCommand ?? (_navigateNewPlateCommand =
+                return _NavNewPlateCommand ?? (_NavNewPlateCommand =
                     new RelayCommand(
                                 aa,
                                 () => !EditsWereMade()
@@ -179,40 +225,40 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion // NavigateNewPlateCommand
+        #endregion // NavNewPlateCommand
 
 
-        #region NavigatePlateEditorCommand
+        #region NavAddSamplesToPlateCommand
 
-        RelayCommand? _navigatePlateEditorCommand;
-        public ICommand NavigatePlateEditorCommand
+        RelayCommand? _NavAddSamplesToPlateCommand;
+        public ICommand NavAddSamplesToPlateCommand
         {
             get
             {
                 Action aa = () => { };
-                return _navigatePlateEditorCommand ?? 
-                    (_navigatePlateEditorCommand = new RelayCommand(aa,
+                return _NavAddSamplesToPlateCommand ?? 
+                    (_NavAddSamplesToPlateCommand = new RelayCommand(aa,
                             () => false ));
             }
         }
 
-        #endregion // NavigatePlateEditorCommand
+        #endregion // NavAddSamplesToPlateCommand
 
 
-        #region NavigatePlateListCommand
+        #region NavAllPlatesCommand
 
-        RelayCommand? _navigatePlateListCommand;
-        public ICommand NavigatePlateListCommand
+        RelayCommand? _NavAllPlatesCommand;
+        public ICommand NavAllPlatesCommand
         {
             get
             {
                 Action aa = () =>
                 {
                     NavigationStore.CurrentViewModel =
-                    new PlateListPageVm(NavigationStore, 
+                    new AllPlatesPageVm(NavigationStore, 
                         ModalNavigationStore, PlateStore, Plate);
                 };
-                return _navigatePlateListCommand ?? (_navigatePlateListCommand =
+                return _NavAllPlatesCommand ?? (_NavAllPlatesCommand =
                     new RelayCommand(
                             aa,
                             () => !EditsWereMade()
@@ -220,14 +266,54 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion // NavigatePlateListCommand
+        #endregion // NavAllPlatesCommand
+
+
+        #region NavAllSamplesCommand
+
+        RelayCommand? _navAllSamplesCommand;
+        public ICommand? NavAllSamplesCommand
+        {
+            get
+            {
+                Action aa = () => { };
+                return _navAllSamplesCommand ?? (_navAllSamplesCommand =
+                    new RelayCommand(
+                            aa,
+                            () => false
+                            ));
+            }
+        }
+
+        #endregion // NavAllSamplesCommand
+
+
+        #region NavNewSamplesCommand
+
+        RelayCommand? _navNewSamplesCommand;
+        public ICommand? NavNewSamplesCommand
+        {
+            get
+            {
+                Action aa = () => { };
+                return _navNewSamplesCommand ?? (_navNewSamplesCommand =
+                    new RelayCommand(
+                            aa,
+                            () => false
+                            ));
+            }
+        }
+
+        #endregion // NavNewSamplesCommand
+
+
 
         bool Validate()
         {
             if(!EditsWereMade()) return false;
 
             if ((Plate.Name != PlateName) && 
-                (PlateStore.data.ContainsKey(PlateName)))
+                (PlateStore.ContainsPlateName(PlateName)))
             {
                 ValidationResult = $"Plate name is already in use";
                 return false;

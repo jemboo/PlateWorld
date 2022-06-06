@@ -20,14 +20,14 @@
             <DataTemplate DataType="{x:Type viewModels:NewPlatePageVm}">
                 <views:NewPlatePage />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModels:PlateEditorPageVm}">
-                <views:PlateEditorPage />
+            <DataTemplate DataType="{x:Type viewModels:AddSamplesToPlatePageVm}">
+                <views:AddSamplesToPlatePage />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:HomePageVm}">
                 <views:HomePage />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModels:PlateListPageVm}">
-                <views:PlateListPage />
+            <DataTemplate DataType="{x:Type viewModels:AllPlatesPageVm}">
+                <views:AllPlatesPage />
             </DataTemplate>
             <DataTemplate DataType="{x:Type mvvmvm:LayoutViewModel}">
                 <parts:Layout />

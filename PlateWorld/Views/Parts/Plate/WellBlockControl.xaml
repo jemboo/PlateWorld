@@ -3,24 +3,40 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:PlateWorld.Views.Parts.Plate" x:Class="PlateWorld.Views.Parts.Plate.WellBlockControl"
-             mc:Ignorable="d" 
+             xmlns:local="clr-namespace:PlateWorld.Views.Parts.Plate" 
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             x:Class="PlateWorld.Views.Parts.Plate.WellBlockControl"
+             xmlns:conv="clr-namespace:PlateWorld.Mvvm.Converters;assembly=PlateWorld.Mvvm" xmlns:dragdrop="clr-namespace:PlateWorld.ViewModels.DragDrop"
+    mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <DataTemplate x:Key="ListBoxItemTemplate1">
-            <Grid Width="30" Height="30">
-                <TextBlock Text="{Binding Text}" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center"/>
-            </Grid>
+
+        <dragdrop:UnwrapConverter x:Key="unWrap"/>
+        
+        <DataTemplate x:Key="WellControlTemplate">
+            <local:WellControl/>
+        </DataTemplate>
+        <DataTemplate x:Key="DragAdorner">
+            <Border Background="DarkGoldenrod">
+                    <local:WellControl DataContext="{Binding Converter={StaticResource unWrap}}" />
+            </Border>
+            <!--<local:WellControl DataContext="{Binding, Converter= conv:PassThruConverter}" />-->
         </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
-        <ListBox ItemTemplate="{DynamicResource ListBoxItemTemplate1}" 
-                 ItemsSource="{Binding WellVms, Mode=OneWay}" 
+        <ListBox ItemContainerStyle="{DynamicResource WellItemContainerStyle}" 
+                 SelectionMode="Extended"
+                 ItemTemplate="{DynamicResource WellControlTemplate}" 
+                 ItemsSource="{Binding WellVms, Mode=OneWay}"
                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
-                 ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                 ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="{x:Null}"
+                 dd:DragDrop.DragHandler="{Binding PlateDragHandler}"
+                 dd:DragDrop.DropHandler="{Binding PlateDropHandler}"
+                 dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}"
+                 dd:DragDrop.IsDragSource="True"
+                 dd:DragDrop.IsDropTarget="True"
+                 dd:DragDrop.UseDefaultEffectDataTemplate="True">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel MaxWidth="{Binding ActualWidth, Mode=OneWay, 

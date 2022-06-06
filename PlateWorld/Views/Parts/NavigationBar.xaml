@@ -19,6 +19,11 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
 
         <TextBlock
@@ -30,30 +35,46 @@
         <Button
             Grid.Column="1"
             Margin="10 0 0 0"
-            Command="{Binding NavigateHomeCommand}"
+            Command="{Binding NavHomeCommand}"
             Content="Home" 
             Style="{DynamicResource MenuButton}"/>
 
         <Button
             Grid.Column="2"
             Margin="10 0 0 0"
-            Command="{Binding NavigatePlateEditorCommand}"
-            Content="Edit Plate" 
+            Command="{Binding NavNewSamplesCommand}"
+            Content="New Samples" 
             Style="{DynamicResource MenuButton}"/>
 
         <Button
             Grid.Column="3"
             Margin="10 0 0 0"
-            Command="{Binding NavigateNewPlateCommand}"
+            Command="{Binding NavNewPlateCommand}"
             Content="New Plate" 
             Style="{DynamicResource MenuButton}"/>
 
         <Button
             Grid.Column="4"
             Margin="10 0 0 0"
-            Command="{Binding NavigatePlateListCommand}"
+            Command="{Binding NavAllSamplesCommand}"
+            Content="All Samples" 
+            Style="{DynamicResource MenuButton}"/>
+
+        <Button
+            Grid.Column="5"
+            Margin="10 0 0 0"
+            Command="{Binding NavAllPlatesCommand}"
             Content="All Plates" 
             Style="{DynamicResource MenuButton}"/>
+
+
+        <Button
+            Grid.Column="6"
+            Margin="10 0 0 0"
+            Command="{Binding NavAddSamplesToPlateCommand}"
+            Content="Add Samples" 
+            Style="{DynamicResource MenuButton}"/>
+
 
     </Grid>
 </UserControl>

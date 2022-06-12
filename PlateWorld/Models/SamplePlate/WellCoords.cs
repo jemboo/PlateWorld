@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace PlateWorld.Models
+namespace PlateWorld.Models.SamplePlate
 {
     public struct WellCoords
     {
@@ -24,12 +24,12 @@ namespace PlateWorld.Models
     {
         public static string ToWellName(this WellCoords wc)
         {
-            return $"{ColumnIndexToSymbol(wc.Row)}{wc.Column}";
+            return $"{wc.Row.ColumnIndexToSymbol()}{wc.Column}";
         }
 
         public static WellCoords ToWellCoords(this string wellName)
         {
-            var coords = SplitCoordName(wellName);
+            var coords = wellName.SplitCoordName();
             return new WellCoords(row: coords.Item1, column: coords.Item2);
         }
 
@@ -56,7 +56,7 @@ namespace PlateWorld.Models
             for (int i = 0; i < columnSymbol.Length; i++)
             {
                 sum *= 26;
-                sum += (columnSymbol[i] - 'A' + 1);
+                sum += columnSymbol[i] - 'A' + 1;
             }
 
             return sum;
@@ -68,11 +68,11 @@ namespace PlateWorld.Models
             try
             {
                 var pcs = Regex.Split(cordName, @"[^A-Z0-9]+|(?<=[A-Z])(?=[0-9])|(?<=[0-9])(?=[A-Z])");
-                if(pcs.Length != 2)
+                if (pcs.Length != 2)
                 {
                     throw new Exception("invalid well coord name");
                 }
-                return new Tuple<int, int>(int.Parse(pcs[1]), ColumnSymbolToIndex(pcs[0]));
+                return new Tuple<int, int>(int.Parse(pcs[1]), pcs[0].ColumnSymbolToIndex());
             }
             catch
             {

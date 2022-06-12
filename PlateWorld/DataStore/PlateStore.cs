@@ -1,22 +1,27 @@
-﻿using PlateWorld.Models;
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using PlateWorld.Models.SamplePlate;
 
 namespace PlateWorld.DataStore
 {
     public class PlateStore
     {
-        public event Action<Plate> PlateAdded;
-        Dictionary<int, Plate> plateDict { get; set; } = new Dictionary<int, Plate>();
+        public event Action<IPlate[]> PlatesAdded;
+        public event Action<IPlate[]> PlatesRemoved;
+        Dictionary<Guid, Plate> plateDict { get; set; } 
+            = new Dictionary<Guid, Plate>();
 
-        public void AddPlate(Plate plate)
+        public void AddPlates(Plate[] plates)
         {
-            plateDict[plate.Id] = plate;
-            PlateAdded?.Invoke(plate);
+            foreach (var plate in plates)
+            {
+                plateDict[plate.Id] = plate;
+            }
+            PlatesAdded?.Invoke(plates);
         }
 
-        public bool ContainsPlate(int plateId)
+        public bool ContainsPlate(Guid plateId)
         {
             return plateDict.ContainsKey(plateId);
         }
@@ -30,9 +35,12 @@ namespace PlateWorld.DataStore
             get { return plateDict.Values; }
         }
 
-        public bool RemovePlate(Plate plate)
+        public bool[] RemovePlates(IPlate[] plates)
         {
-            return plateDict.Remove(plate.Id);
+            var res = plates.Select(
+                plate => plateDict.Remove(plate.Id));
+            PlatesRemoved?.Invoke(plates);
+            return res.ToArray();
         }
 
     }

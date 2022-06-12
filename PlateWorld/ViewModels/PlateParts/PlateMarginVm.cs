@@ -1,5 +1,5 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using PlateWorld.Models;
+using PlateWorld.Models.SamplePlate;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;

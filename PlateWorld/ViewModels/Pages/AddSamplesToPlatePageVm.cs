@@ -1,14 +1,12 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
-using PlateWorld.Models;
-using PlateWorld.Models.TestData;
+using PlateWorld.Models.SamplePlate;
 using PlateWorld.Mvvm.Stores;
+using PlateWorld.ViewModels.DragDrop;
 using PlateWorld.ViewModels.PlateParts;
 using System;
-using System.Linq;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using PlateWorld.ViewModels.DragDrop;
 
 namespace PlateWorld.ViewModels.Pages
 {
@@ -25,7 +23,7 @@ namespace PlateWorld.ViewModels.Pages
 
         public AddSamplesToPlatePageVm(NavigationStore navigationStore, 
                 ModalNavigationStore modalNavigationStore,
-                DataStore.PlateStore plateStore, Plate? plate)
+                DataStore.PlateStore plateStore, IPlate? plate)
         {
             NavigationStore = navigationStore;
             ModalNavigationStore = modalNavigationStore;
@@ -36,7 +34,7 @@ namespace PlateWorld.ViewModels.Pages
 
             if (Plate != null)
             {
-                PlateVm = new PlateVm(Plate);
+                PlateVm = new PlateVm(Plate, PlateStore);
                 if (plate.RowCount > 20)
                 {
                     Zoom = 1;
@@ -48,16 +46,16 @@ namespace PlateWorld.ViewModels.Pages
                 Zoom = 2;
             }
 
-            var samples = AnimalThemedContainerExt.MakeSamples(123, 100)
-                            .ToArray();
-            var dex = 1;
-            var sampleVms = samples.Select(s => s.FromAtc($"Sample {dex++}")
-                            .ToVm());
-            _sampleVms = new ObservableCollection<SampleVm>(sampleVms);
+            //var samples = AnimalThemedContainerExt.MakeSamples(123, 100)
+            //                .ToArray();
+            //var dex = 1;
+            //var sampleVms = samples.Select(s => s.FromAtc($"Sample {dex++}")
+            //                .ToVm());
+            //_sampleVms = new ObservableCollection<SampleVm>(sampleVms);
         }
         DataStore.PlateStore PlateStore { get; }
 
-        Plate? Plate { get; }
+        IPlate? Plate { get; }
 
         private PlateVm _plateVm;
         public PlateVm PlateVm
@@ -171,7 +169,7 @@ namespace PlateWorld.ViewModels.Pages
                 Action aa = () =>
                 {
                     var newPlate = Plate.NewName(newName: PlateName);
-                    PlateStore.AddPlate(newPlate);
+                    PlateStore.AddPlates(new[] { newPlate });
                     NavigationStore.CurrentViewModel = new AddSamplesToPlatePageVm(
                         NavigationStore, ModalNavigationStore, PlateStore, newPlate);
                 };
@@ -276,11 +274,15 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
+                Action aa = () => {
+                    NavigationStore.CurrentViewModel =
+                    new AllSamplesPageVm(NavigationStore,
+                    ModalNavigationStore, PlateStore);
+                };
                 return _navAllSamplesCommand ?? (_navAllSamplesCommand =
                     new RelayCommand(
                             aa,
-                            () => false
+                            () => true
                             ));
             }
         }
@@ -295,11 +297,15 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
+                Action aa = () => {
+                    NavigationStore.CurrentViewModel =
+                    new NewSamplesPageVm(NavigationStore,
+                    ModalNavigationStore, PlateStore);
+                };
                 return _navNewSamplesCommand ?? (_navNewSamplesCommand =
                     new RelayCommand(
                             aa,
-                            () => false
+                            () => true
                             ));
             }
         }

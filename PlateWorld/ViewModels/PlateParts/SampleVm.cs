@@ -1,5 +1,5 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using PlateWorld.Models;
+using PlateWorld.Models.BasicTypes;
 using System;
 
 namespace PlateWorld.ViewModels.PlateParts
@@ -7,10 +7,10 @@ namespace PlateWorld.ViewModels.PlateParts
     [Serializable]
     public class SampleVm : ObservableObject
     {
-        public SampleVm(Guid id, string sampleName)
+        public SampleVm(ISample sample)
         {
-            SampleName = sampleName;
-            Id = id;
+            Sample = sample;
+            SampleName = sample.Name;
         }
 
         private string _sampleName;
@@ -23,23 +23,28 @@ namespace PlateWorld.ViewModels.PlateParts
             }
         }
 
-        private Guid _id;
-        public Guid Id
+        public Guid Id => Sample.Id;
+
+        public bool HasChanges
         {
-            get => _id;
-            set
+            get
             {
-                SetProperty(ref _id, value);
+                return ((SampleName != Sample.Name) ||
+                        (SampleName != Sample.Name));
             }
         }
 
+        public ISample Sample { get; }
+
+        public static SampleVm Empty =>
+            new SampleVm(Models.BasicTypes.Sample.Empty);
     }
 
     public static class SampleVmExt
     {
         public static SampleVm ToVm(this ISample sample)
         {
-            return new SampleVm(sample.Id, sample.Name);
+            return new SampleVm(sample);
         }
     }
 }

@@ -32,6 +32,12 @@
             <DataTemplate DataType="{x:Type mvvmvm:LayoutViewModel}">
                 <parts:Layout />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:NewSamplesPageVm}">
+                <views:NewSamplesPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:AllSamplesPageVm}">
+                <views:AllSamplesPage />
+            </DataTemplate>
         </Grid.Resources>
 
         <Grid Background="#FF323C32" Panel.ZIndex="1" 

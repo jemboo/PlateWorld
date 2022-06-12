@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlateWorld.Models
+namespace PlateWorld.Models.SamplePlate
 {
     public enum WellProperties
     {

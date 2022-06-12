@@ -42,7 +42,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Border  Grid.Row="0" BorderThickness="0,0,0,2" Background="#88A7C09E">
-                <TextBlock Text="Add Samples" FontSize="18"
+                <TextBlock Text="Add Samples" 
+                           FontSize="18"
+                           Margin="0,0,0,15"
                            Style="{DynamicResource LargeTextBlock}" />
             </Border>
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
-using PlateWorld.Models;
+using PlateWorld.Models.SamplePlate;
 using PlateWorld.Mvvm.Stores;
 using System;
 using System.Windows.Input;
@@ -14,7 +14,7 @@ namespace PlateWorld.ViewModels.Pages
         public NewPlatePageVm(
             NavigationStore navigationStore, 
             ModalNavigationStore modalNavigationStore,
-            DataStore.PlateStore? plateStore,
+            DataStore.PlateStore plateStore,
             ICommand cancelCommand)
         {
             NavigationStore = navigationStore;
@@ -27,7 +27,7 @@ namespace PlateWorld.ViewModels.Pages
             ValidationResult = String.Empty;
         }
 
-        DataStore.PlateStore? PlateStore { get; }
+        DataStore.PlateStore PlateStore { get; }
 
         #region CancelCommand
         public ICommand? CancelCommand { get; }
@@ -125,11 +125,15 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
+                Action aa = () => {
+                    NavigationStore.CurrentViewModel =
+                    new AllSamplesPageVm(NavigationStore,
+                    ModalNavigationStore, PlateStore);
+                };
                 return _navAllSamplesCommand ?? (_navAllSamplesCommand =
                     new RelayCommand(
                             aa,
-                            () => false
+                            () => true
                             ));
             }
         }
@@ -144,17 +148,20 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
+                Action aa = () => {
+                    NavigationStore.CurrentViewModel =
+                    new NewSamplesPageVm(NavigationStore,
+                    ModalNavigationStore, PlateStore);
+                };
                 return _navNewSamplesCommand ?? (_navNewSamplesCommand =
                     new RelayCommand(
                             aa,
-                            () => false
+                            () => true
                             ));
             }
         }
 
         #endregion // NavNewSamplesCommand
-
 
 
         private string _plateName;
@@ -214,7 +221,7 @@ namespace PlateWorld.ViewModels.Pages
                             plateName: PlateName,
                             rowCount: RowCount,
                             colCount: ColCount);
-                    PlateStore.AddPlate(newPlate);
+                    PlateStore.AddPlates(new[] { newPlate });
 
                     ModalNavigationStore.CurrentViewModel = null;
                     NavigationStore.CurrentViewModel = new AddSamplesToPlatePageVm(

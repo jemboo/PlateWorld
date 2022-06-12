@@ -22,24 +22,41 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" Width="2" ResizeBehavior="PreviousAndNext"  
-                    ResizeDirection="Columns" Background="#4CE41818"/>
+            <GridSplitter Grid.Column="1" 
+                          VerticalAlignment="Stretch" 
+                          Width="2" 
+                          ResizeBehavior="PreviousAndNext"  
+                          ResizeDirection="Columns" 
+                          Background="#4CE41818"/>
             
             <StackPanel Grid.Column="0">
                 <Border  Grid.Row="0" BorderThickness="0,0,0,2" Background="#668DCDCB">
-                    <TextBlock Grid.Row="0" Text="All Plates"
+                    <TextBlock Grid.Row="0"
+                           Text="All Plates"
+                           Margin="0,0,0,15"
                            Style="{DynamicResource LargeTextBlock}" />
                 </Border>
 
 
                 <DataGrid Margin="20,10" 
-                          ItemsSource="{Binding PlateVms}" SelectionMode="Single"
+                          ItemsSource="{Binding PlateVms}"
+                          SelectionMode="Single"
                           SelectedItem="{Binding SelectedPlateVm, Mode=TwoWay}"
-                          AutoGenerateColumns="False" IsReadOnly="True">
+                          SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}"
+                          AutoGenerateColumns="False" 
+                          IsReadOnly="True" 
+                          FontSize="16" 
+                          HorizontalScrollBarVisibility="Hidden">
+                    
+                    <DataGrid.Resources>
+                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" 
+                                    Color="LightBlue"/>
+                    </DataGrid.Resources>
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Width="200" Binding="{Binding Name}" FontSize="16"/>
-                        <DataGridTextColumn Header="Rows" Width="140" Binding="{Binding RowCount}" FontSize="16"/>
-                        <DataGridTextColumn Header="Cols" Width="140" Binding="{Binding ColumnCount}" FontSize="16"/>
+                        <DataGridTextColumn Header="Name" Width="3*" Binding="{Binding Name}" FontSize="16"/>
+                        <DataGridTextColumn Header="Rows" Width="*" Binding="{Binding RowCount}" FontSize="16"/>
+                        <DataGridTextColumn Header="Cols" Width="*" Binding="{Binding ColumnCount}" FontSize="16"/>
                         <DataGridTextColumn Header="Used Wells" Width="*" Binding="{Binding Plate.UsedWells}" FontSize="16" />
                     </DataGrid.Columns>
                 </DataGrid>
@@ -64,25 +81,39 @@
 
             </StackPanel>
 
-
             <DockPanel LastChildFill="True" Grid.Column="2" >
 
-                <HeaderedContentControl DockPanel.Dock="Top"
-                        HorizontalAlignment="Center">
-                    <HeaderedContentControl.Header>
-                        <TextBlock Text="Name" 
-                    Style="{DynamicResource SmallTextBlock}" />
-                    </HeaderedContentControl.Header>
-                    <TextBox Text="{Binding SelectedPlateVm.Name, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{DynamicResource MediumTextBox}" />
-                </HeaderedContentControl>
+                <StackPanel DockPanel.Dock="Top"
+                    Margin="10"
+                    Orientation="Vertical" 
+                    HorizontalAlignment="Center">
 
+                    <StackPanel DockPanel.Dock="Top"
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center">
+                        <HeaderedContentControl 
+                            HorizontalAlignment="Center">
+                            <HeaderedContentControl.Header>
+                                <TextBlock Text="Name" Style="{DynamicResource SmallTextBlock}" />
+                            </HeaderedContentControl.Header>
+                            <TextBox Text="{Binding SelectedPlateVm.Name, 
+                                     UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{DynamicResource MediumTextBox}" />
+                        </HeaderedContentControl>
+                        
+                        <Button
+                            Command="{Binding SelectedPlateVm.ChangePlateNameCommand}"
+                            Content="Change" 
+                            Style="{DynamicResource NavButton}" />
+                    </StackPanel>
+                    <TextBlock 
+                           Text= "{Binding SelectedPlateVm.ValidationResult}"
+                           Style="{DynamicResource ErrorTextBlock}" />
+                </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom">
                     <Slider x:Name="slider" Margin="40,5" Minimum="0.5" Maximum="10" Value="{Binding Zoom}"/>
-                    <TextBlock 
-                           Text= "{Binding ValidationResult}"
-                           Style="{DynamicResource ErrorTextBlock}" />
+
                 </StackPanel>
                 <ScrollViewer Margin="10" HorizontalScrollBarVisibility="Visible">
                     <Grid>

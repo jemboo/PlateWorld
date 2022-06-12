@@ -21,6 +21,7 @@ namespace PlateWorld.ViewModels.Pages
         }
         DataStore.PlateStore? PlateStore { get; }
 
+
         #region NavHomeCommand
 
         RelayCommand? _NavHomeCommand;
@@ -132,11 +133,14 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
+                Action aa = () => {
+                    NavigationStore.CurrentViewModel =
+                    new AllSamplesPageVm(NavigationStore,
+                    ModalNavigationStore, PlateStore); };
                 return _navAllSamplesCommand ?? (_navAllSamplesCommand =
                     new RelayCommand(
                             aa,
-                            () => false
+                            () => true
                             ));
             }
         }
@@ -151,11 +155,15 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
+                Action aa = () => {
+                    NavigationStore.CurrentViewModel =
+                    new NewSamplesPageVm(NavigationStore,
+                    ModalNavigationStore, PlateStore);
+                };
                 return _navNewSamplesCommand ?? (_navNewSamplesCommand =
                     new RelayCommand(
                             aa,
-                            () => false
+                            () => true
                             ));
             }
         }

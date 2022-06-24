@@ -11,17 +11,14 @@
 
     <UserControl.Resources>
         <DataTemplate x:Key="DragAdorner">
-            <Border Background="DeepPink"
-                            BorderBrush="Green"
-                            BorderThickness="4"
-                            CornerRadius="2"
-                            SnapsToDevicePixels="True">
-                <StackPanel Margin="4" Orientation="Horizontal">
-                    <TextBlock Margin="6 0 0 0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding}" />
-                </StackPanel>
+            <Border Background="DarkGoldenrod" Width="50" Height="50">
+                <Viewbox Stretch="Uniform">
+                    <plate:WellControl DataContext="{Binding}" />
+                </Viewbox>
             </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="DragAdornerEffect">
+            <Border Width="10" Height="10" Background="Transparent"/>
         </DataTemplate>
     </UserControl.Resources>
 
@@ -32,8 +29,6 @@
         </Grid.RowDefinitions>
 
         <parts:NavigationBar Grid.Row="0" />
-
-
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
@@ -55,7 +50,8 @@
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
 
-                <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" Width="2" ResizeBehavior="PreviousAndNext"  
+                <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" Width="2" 
+                              ResizeBehavior="PreviousAndNext"  
                     ResizeDirection="Columns" Background="#4CE41818"/>
                 
                 <Grid Grid.Column="0">
@@ -65,24 +61,29 @@
                     </Grid.RowDefinitions>
                     <TextBlock Text="Samples" Style="{DynamicResource MediumTextBlock}"/>
 
-                    <DataGrid ItemsSource="{Binding SampleVms}" 
+                    <parts:DynoGrid ItemsSource="{Binding SampleVms}" 
                        Grid.Row="1"
+                       Margin="0,0,5,5"
                        SelectionMode="Extended"
                        AutoGenerateColumns="False"
+                       ColumnInfo="{Binding ColumnInfo}"
                        dd:DragDrop.DragHandler="{Binding SamplesDragHandler}"
                        dd:DragDrop.DropHandler="{Binding SamplesDropHandler}"
                        dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}"
                        dd:DragDrop.IsDragSource="True"
                        dd:DragDrop.IsDropTarget="True"
-                       dd:DragDrop.UseDefaultEffectDataTemplate="True"
-                       dd:DragDrop.DragPreviewItemsSorter="{Binding}" Margin="0,0,5,5">
+                       dd:DragDrop.EffectMoveAdornerTemplate="{StaticResource DragAdornerEffect}"
+                       dd:DragDrop.EffectCopyAdornerTemplate="{StaticResource DragAdornerEffect}"
+                       dd:DragDrop.UseDefaultEffectDataTemplate="False"
+                       dd:DragDrop.DragPreviewItemsSorter="{Binding}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Width="200" Binding="{Binding SampleName}" FontSize="14"/>
-                            <DataGridTextColumn Header="Id" Width="*" Binding="{Binding Id}" FontSize="14" CanUserResize="False"/>
+                            <DataGridTextColumn Header="PlateName" Width="2*" Binding="{Binding PlateName}" FontSize="14" CanUserResize="False"/>
+                            <DataGridTextColumn Header="WellName" Width="*" Binding="{Binding WellName}" FontSize="14" CanUserResize="False"/>
                             <!--<DataGridTextColumn Header="Cols" Width="140" Binding="{Binding WellsPerColumn}" FontSize="16"/>
                             <DataGridTextColumn Header="Used Wells" Width="*" Binding="{Binding UsedWells}" FontSize="16" />-->
                         </DataGrid.Columns>
-                    </DataGrid>
+                    </parts:DynoGrid>
                     
                 </Grid>
 
@@ -124,15 +125,16 @@
                             Orientation="Horizontal" 
                             HorizontalAlignment="Center">
                     <Button 
-                                Command="{Binding SavePlateCommand}"
-                                Content="Save" 
-                                CommandParameter="{Binding Mode=OneWay}" 
-                                Style="{DynamicResource NavButton}" />
+                            Command="{Binding SavePlateCommand}"
+                            Content="Save" 
+                            CommandParameter="{Binding Mode=OneWay}" 
+                            Style="{DynamicResource NavButton}" />
 
-                    <Button
-                                Command="{Binding CancelCommand}"
-                                Content="Cancel" 
-                                Style="{DynamicResource NavButton}" />
+                    <Button 
+                            Command="{Binding ClearChangesCommand}"
+                            Content="Cancel" 
+                            CommandParameter="{Binding Mode=OneWay}" 
+                            Style="{DynamicResource NavButton}" />
 
                 </StackPanel>
 

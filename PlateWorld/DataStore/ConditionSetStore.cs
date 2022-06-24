@@ -5,41 +5,41 @@ using PlateWorld.Models.SamplePlate;
 
 namespace PlateWorld.DataStore
 {
-    public class ConditionSetStore
+    public class PropertySetStore
     {
-        public event Action<IPlate[]> ConditionSetsAdded;
-        public event Action<IPlate[]> ConditionSetsRemoved;
-        Dictionary<Guid, Plate> conditionSetDict { get; set; } 
+        public event Action<IPlate[]> PropertySetsAdded;
+        public event Action<IPlate[]> PropertySetsRemoved;
+        Dictionary<Guid, Plate> propertySetDict { get; set; } 
             = new Dictionary<Guid, Plate>();
 
-        public void AddConditionSets(Plate[] conditionSets)
+        public void AddPropertySets(Plate[] propertySets)
         {
-            foreach (var conditionSet in conditionSets)
+            foreach (var propertySet in propertySets)
             {
-                conditionSetDict[conditionSet.Id] = conditionSet;
+                propertySetDict[propertySet.Id] = propertySet;
             }
-            ConditionSetsAdded?.Invoke(conditionSets);
+            PropertySetsAdded?.Invoke(propertySets);
         }
 
-        public bool ContainsConditionSet(Guid conditionSetId)
+        public bool ContainsPropertySet(Guid propertySetId)
         {
-            return conditionSetDict.ContainsKey(conditionSetId);
+            return propertySetDict.ContainsKey(propertySetId);
         }
 
-        public bool ContainsConditionSetName(string conditionSetName)
+        public bool ContainsPropertySetName(string propertySetName)
         {
-            return conditionSetDict.Values.Any(p => p.Name == conditionSetName);
+            return propertySetDict.Values.Any(p => p.Name == propertySetName);
         }
-        public IEnumerable<Plate> AllConditionSets 
+        public IEnumerable<Plate> AllPropertySets 
         {
-            get { return conditionSetDict.Values; }
+            get { return propertySetDict.Values; }
         }
 
-        public bool[] Remove(IPlate[] conditionSets)
+        public bool[] Remove(IPlate[] propertySets)
         {
-            var res = conditionSets.Select(
-                conditionSet => conditionSetDict.Remove(conditionSet.Id));
-            ConditionSetsRemoved?.Invoke(conditionSets);
+            var res = propertySets.Select(
+                propertySet => propertySetDict.Remove(propertySet.Id));
+            PropertySetsRemoved?.Invoke(propertySets);
             return res.ToArray();
         }
 

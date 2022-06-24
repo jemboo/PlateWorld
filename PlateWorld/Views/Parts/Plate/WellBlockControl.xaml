@@ -6,21 +6,23 @@
              xmlns:local="clr-namespace:PlateWorld.Views.Parts.Plate" 
              xmlns:dd="urn:gong-wpf-dragdrop"
              x:Class="PlateWorld.Views.Parts.Plate.WellBlockControl"
-             xmlns:conv="clr-namespace:PlateWorld.Mvvm.Converters;assembly=PlateWorld.Mvvm" xmlns:dragdrop="clr-namespace:PlateWorld.ViewModels.DragDrop"
-    mc:Ignorable="d"
+             xmlns:dragdrop="clr-namespace:PlateWorld.ViewModels.DragDrop"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-
         <dragdrop:UnwrapConverter x:Key="unWrap"/>
-        
         <DataTemplate x:Key="WellControlTemplate">
             <local:WellControl/>
         </DataTemplate>
         <DataTemplate x:Key="DragAdorner">
-            <Border Background="DarkGoldenrod">
-                    <local:WellControl DataContext="{Binding Converter={StaticResource unWrap}}" />
+            <Border Background="DarkGoldenrod" Width="50" Height="50">
+                <Viewbox Stretch="Uniform">
+                    <local:WellControl DataContext="{Binding}" />
+                </Viewbox>
             </Border>
-            <!--<local:WellControl DataContext="{Binding, Converter= conv:PassThruConverter}" />-->
+        </DataTemplate>
+        <DataTemplate x:Key="DragAdornerEffect">
+            <Border Width="10" Height="10" Background="Transparent"/>
         </DataTemplate>
     </UserControl.Resources>
 

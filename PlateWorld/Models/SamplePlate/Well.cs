@@ -9,19 +9,24 @@ namespace PlateWorld.Models.SamplePlate
 {
     public class Well
     {
-        public Well(int row, int column, Sample sample = null)
+        public Well(int row, int column, ISample sample = null)
         {
             WellCoords = new WellCoords(row, column);
             Sample = sample;
         }
 
-        public Sample Sample { get; set; }
+        public ISample? Sample { get; }
 
-        public WellCoords WellCoords { get; set; }
+        public WellCoords WellCoords { get; }
+
     }
 
     public static class WellExt
     {
 
+        public static Well AddSample(this Well well, ISample? sample)
+        {
+            return new Well(well.WellCoords.Row, well.WellCoords.Column, sample);
+        }
     }
 }

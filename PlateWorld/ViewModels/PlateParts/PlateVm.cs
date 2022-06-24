@@ -1,43 +1,36 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.Input;
 using PlateWorld.Models.SamplePlate;
 using PlateWorld.ViewModels.DragDrop;
+using PlateWorld.ViewModels.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace PlateWorld.ViewModels.PlateParts
 {
-    public class PlateVm : ObservableObject
+    public class PlateVm : ObservableObject, IUpdater<WellVm>
     {
         public PlateVm(IPlate plate,
-                        DataStore.PlateStore plateStore)
+                       DataStore.PlateStore plateStore)
         {
             Plate = plate ?? throw new Exception("Plate was null");
             PlateStore = plateStore;
             _name = plate.Name;
-            _validationResult = string.Empty;
-            _changePlateNameCommand = new RelayCommand(DoNameChange, ValidNameChange);
+            _validationMessage = string.Empty;
             RowCount = Plate.RowCount;
             ColumnCount = Plate.ColumnCount;
-            WellVms = Plate.Wells.Select(w => new WellVm(w)).ToList();
-            foreach (var w in WellVms)
-            {
-                w.PropertyChanged += W_PropertyChanged;
-            }
+            WellVms = Plate.Wells.Select(
+                w => new WellVm(w, Plate.Name, this)).ToList();
+            HorizontalMarginVm = new PlateMarginVm(Orientation.Horizontal, ColumnCount);
+            VerticalMarginVm = new PlateMarginVm(Orientation.Vertical, RowCount);
+        }
 
-            HorizontalMarginVm = new PlateMarginVm(Orientation.Horizontal, RowCount);
-            VerticalMarginVm = new PlateMarginVm(Orientation.Vertical, ColumnCount);
+        public void Update(WellVm entity)
+        {
         }
 
         DataStore.PlateStore PlateStore { get; }
-
-        private void W_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-
-        }
 
         string _name;
         public string Name
@@ -46,27 +39,39 @@ namespace PlateWorld.ViewModels.PlateParts
             set
             {
                 SetProperty(ref _name, value);
-                _changePlateNameCommand?.NotifyCanExecuteChanged();
+                ValidateNameChange();
+                CheckForChanges();
             }
         }
         public int RowCount { get; }
         public int ColumnCount { get; }
         public IPlate Plate { get; private set; }
-        public List<WellVm> WellVms { get; }
+        public List<WellVm> WellVms { get; private set; }
         public PlateMarginVm HorizontalMarginVm { get; }
         public PlateMarginVm VerticalMarginVm { get; }
+
+        void CheckForChanges()
+        {
+            HasChanges = (Name != Plate.Name) ||
+                          WellVms.Any(w => w.HasChanges);
+        }
+
+        bool _hasChanges;
         public bool HasChanges
         {
-            get
+            get => _hasChanges;
+            set
             {
-                return ((Name != Plate.Name) ||
-                        (Name != Plate.Name));
+                SetProperty(ref _hasChanges, value);
+                ValidateNameChange();
             }
         }
 
         public void UndoChanges()
         {
             Name = Plate.Name;
+            WellVms = Plate.Wells.Select(
+                w => new WellVm(w, Plate.Name, this)).ToList();
         }
 
         public static PlateVm Empty =>
@@ -82,53 +87,43 @@ namespace PlateWorld.ViewModels.PlateParts
 
         #endregion
 
-        #region ChangePlateNameCommand
 
-        RelayCommand? _changePlateNameCommand;
-        public ICommand ChangePlateNameCommand
+        void SaveChanges()
         {
-            get { return _changePlateNameCommand; }
-        }
-        void DoNameChange()
-        {
-            var newPlate = Plate.NewName(Name);
+            var newWells = WellVms.Select(vm => vm.Well.AddSample(vm.SampleVm?.Sample));
+            var newPlate = Plate.Update(Name, newWells);
             PlateStore.RemovePlates(new[] { Plate });
             PlateStore.AddPlates(new[] { newPlate });
             Plate = newPlate;
-            _changePlateNameCommand?.NotifyCanExecuteChanged();
         }
 
-        bool ValidNameChange()
+        void ValidateNameChange()
         {
-            if (PlateStore == null)
-            {
-                ValidationResult = String.Empty;
-                return false;
-            }
             if (Plate.Name == Name)
             {
-                ValidationResult = String.Empty;
-                return false;
+                ValidationMessage = String.Empty;
+                return;
             }
-
+            if (PlateStore == null)
+            {
+                ValidationMessage = String.Empty;
+                return;
+            }
             if (PlateStore.ContainsPlateName(Name))
             {
-                ValidationResult = $"Plate name is already in use";
-                return false;
+                ValidationMessage = $"Plate name is already in use";
+                return;
             }
-            ValidationResult = String.Empty;
-            return true;
         }
 
-        #endregion // ChangePlateNameCommand
 
-        private string _validationResult;
-        public string ValidationResult
+        private string _validationMessage;
+        public string ValidationMessage
         {
-            get => _validationResult;
+            get => _validationMessage;
             set
             {
-                SetProperty(ref _validationResult, value);
+                SetProperty(ref _validationMessage, value);
             }
         }
 

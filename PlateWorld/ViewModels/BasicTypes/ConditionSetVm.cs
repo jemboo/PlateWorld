@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace PlateWorld.ViewModels.BasicTypes
 {
-    public class ConditionSetVm : ObservableObject
+    public class PropertySetVm : ObservableObject
     {
-        public ConditionSetVm(IConditionSet conditionSet)
+        public PropertySetVm(IPropertySet propertySet)
         {
-            ConditionSet = conditionSet;
+            PropertySet = propertySet;
         }
 
-        public IConditionSet ConditionSet { get; }
+        public IPropertySet PropertySet { get; }
 
-        public string Name { get { return ConditionSet.Name; } }
+        public string Name { get { return PropertySet.Name; } }
 
-        public string Description { get { return ConditionSet.Description; } }
+        public string Description { get { return PropertySet.Description; } }
 
-        public int ConditionCount { get { return ConditionSet.TestValues.Count(); } }
+        public int PropertyCount { get { return PropertySet.TestValues.Count(); } }
     }
 }

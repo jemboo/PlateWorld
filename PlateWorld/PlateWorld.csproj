@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\redo-arrow.png" />
+    <None Remove="Assets\redo-icon.jpg" />
+    <None Remove="Assets\undo-arrow.png" />
+    <None Remove="Assets\undo-icon.jpg" />
     <None Remove="pongki.png" />
     <None Remove="Views\Pages\PongkiAndRudi.PNG" />
     <None Remove="Views\Parts\Plate\pongki.png" />
@@ -28,11 +32,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Views\Pages\pongki.png">
+    <Resource Include="Assets\redo-arrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Views\Pages\PongkiAndRudi.PNG" />
-    <Resource Include="Views\Parts\Plate\pongki.png" />
+    <Resource Include="Assets\redo-icon.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\undo-arrow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\undo-icon.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\pongki.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\PongkiAndRudi.PNG">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

@@ -16,8 +16,9 @@
 
         <Grid Background="BlueViolet" Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
                 <RowDefinition/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock 
                 Style="{DynamicResource MediumTextBlock}" 
@@ -39,12 +40,12 @@
                 <StackPanel Grid.Column="0">
                     <Border  Grid.Row="0" BorderThickness="0,0,0,2" 
                              Background="#668DCDCB">
-                        <TextBlock Grid.Row="0" Text="All Condition Sets"
+                        <TextBlock Grid.Row="0" Text="All Property Sets"
                            Style="{DynamicResource LargeTextBlock}" />
                     </Border>
 
                     <DataGrid Margin="20,10"
-                          ItemsSource="{Binding AllVms}"
+                          ItemsSource="{Binding AllPropertySetVms}"
                           SelectionMode="Single"
                           SelectedItem="{Binding SelectedVm, Mode=TwoWay}"
                           SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}"
@@ -83,10 +84,10 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
                             <DataGridTextColumn 
-                                Header="Condition count" 
+                                Header="Property count" 
                                 Width="2*" 
                                 HeaderStyle="{DynamicResource CenterGridHeaderStyle}"
-                                Binding="{Binding ConditionCount}" 
+                                Binding="{Binding PropertyCount}" 
                                 FontSize="16">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style>
@@ -105,14 +106,10 @@
                     HorizontalAlignment="Center">
                         <Button 
                         Command="{Binding AddCommand}"
-                        Content="Add" 
+                        Content="Add >>" 
                         CommandParameter="{Binding Mode=OneWay}" 
                         Style="{DynamicResource NavButton}" />
 
-                        <Button
-                        Command="{Binding RemoveCommand}"
-                        Content="Remove" 
-                        Style="{DynamicResource NavButton}" />
 
                     </StackPanel>
 
@@ -122,12 +119,12 @@
                 <StackPanel Grid.Column="2">
                     <Border  Grid.Row="0" BorderThickness="0,0,0,2" 
                              Background="#668DCDCB">
-                        <TextBlock Grid.Row="0" Text="Selected Condition Sets"
+                        <TextBlock Grid.Row="0" Text="Selected Property Sets"
                            Style="{DynamicResource LargeTextBlock}" />
                     </Border>
 
                     <DataGrid Margin="20,10"
-                          ItemsSource="{Binding ChosenVms}"
+                          ItemsSource="{Binding ChosenPropertySetVms}"
                           SelectionMode="Single"
                           SelectedItem="{Binding SelectedChosenVm, Mode=TwoWay}"
                           SelectedIndex="{Binding ChosenIndex, Mode=TwoWay}"
@@ -166,10 +163,10 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
                             <DataGridTextColumn 
-                                Header="Condition count" 
+                                Header="Property count" 
                                 Width="2*" 
                                 HeaderStyle="{DynamicResource CenterGridHeaderStyle}"
-                                Binding="{Binding ConditionCount}" 
+                                Binding="{Binding PropertyCount}" 
                                 FontSize="16">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style>
@@ -186,16 +183,40 @@
                     Margin="0 20 0 0"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Center">
-                        <Button 
-                        Command="{Binding MoveUpCommand}"
-                        Content="Create" 
-                        CommandParameter="{Binding Mode=OneWay}" 
+
+                        <Button
+                        Command="{Binding RemoveCommand}"
+                        Content="&lt;&lt; Remove" 
                         Style="{DynamicResource NavButton}" />
 
                     </StackPanel>
 
                 </StackPanel>
             </Grid>
+            <StackPanel Grid.Row="2"
+                    Margin="0 20"
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center">
+
+                <HeaderedContentControl>
+                    <HeaderedContentControl.Header>
+                        <TextBlock Text="SampleCount" 
+                            Style="{DynamicResource SmallTextBlock}" />
+                    </HeaderedContentControl.Header>
+                    <TextBlock Text="{Binding SampleCount}" 
+                            Style="{DynamicResource SmallTextBlock}" HorizontalAlignment="Left" />
+                </HeaderedContentControl>
+                
+                <Button Margin="20,0"
+                        Command="{Binding CreateSamplesCommand}"
+                        Content="Create" 
+                        CommandParameter="{Binding Mode=OneWay}" 
+                        Style="{DynamicResource NavButton}" />
+
+                <TextBlock Margin="50,0,0,0" Text="{Binding StatusMessage}" 
+                        Style="{DynamicResource SmallTextBlock}" />
+
+            </StackPanel>
         </Grid>
 
     </Grid>

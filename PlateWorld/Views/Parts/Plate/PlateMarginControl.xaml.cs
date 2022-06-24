@@ -8,7 +8,6 @@ namespace PlateWorld.Views.Parts.Plate
         public PlateMarginControl()
         {
             InitializeComponent();
-            var qua = Orientation.Horizontal;
         }
 
         public Orientation Orientation 
@@ -20,7 +19,8 @@ namespace PlateWorld.Views.Parts.Plate
         }
 
         public static readonly DependencyProperty OrientationProperty =
-            DependencyProperty.Register("PlotPoints", typeof(Orientation), typeof(PlateMarginControl));
+            DependencyProperty.Register("Orientation", typeof(Orientation), 
+                typeof(PlateMarginControl));
 
 
 

@@ -33,7 +33,9 @@ namespace PlateWorld.ViewModels.DragDrop
         /// <inheritdoc />
         public bool CanStartDrag(IDragInfo dragInfo)
         {
-            return true;
+            var src = dragInfo.SourceItem as SampleVm;
+            if (src == null) return false;
+            return string.IsNullOrEmpty(src.PlateName);
         }
 
         /// <inheritdoc />
@@ -79,7 +81,7 @@ namespace PlateWorld.ViewModels.DragDrop
                     {
                         foreach (var o in items)
                         {
-                            sourceList.Remove(o);
+                            //sourceList.Remove(o);
                         }
                     }
 

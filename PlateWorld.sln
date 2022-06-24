@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlateWorld", "PlateWorld\PlateWorld.csproj", "{6D09028F-0820-4FE9-ADCE-A949AB93578D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlateWorld", "PlateWorld\PlateWorld.csproj", "{6D09028F-0820-4FE9-ADCE-A949AB93578D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlateWorld.Mvvm", "PlateWorld.Mvvm\PlateWorld.Mvvm.csproj", "{C149A4C1-66F8-4FE8-94C8-A0B49DAED2B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlateWorld.Mvvm", "PlateWorld.Mvvm\PlateWorld.Mvvm.csproj", "{C149A4C1-66F8-4FE8-94C8-A0B49DAED2B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlateWorld.Test", "PlateWorld.Test\PlateWorld.Test.csproj", "{A3C93CE5-4AF0-4BA6-9405-751B2CA8083E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{C149A4C1-66F8-4FE8-94C8-A0B49DAED2B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C149A4C1-66F8-4FE8-94C8-A0B49DAED2B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C149A4C1-66F8-4FE8-94C8-A0B49DAED2B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3C93CE5-4AF0-4BA6-9405-751B2CA8083E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3C93CE5-4AF0-4BA6-9405-751B2CA8083E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3C93CE5-4AF0-4BA6-9405-751B2CA8083E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3C93CE5-4AF0-4BA6-9405-751B2CA8083E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,8 @@ using System;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using PlateWorld.Models.BasicTypes;
+using System.Threading.Tasks;
 
 namespace PlateWorld.ViewModels.Pages
 {
@@ -17,24 +19,38 @@ namespace PlateWorld.ViewModels.Pages
         public NewSamplesPageVm(
                 NavigationStore navigationStore,
                 ModalNavigationStore modalNavigationStore,
-                DataStore.PlateStore? plates)
+                DataStore.SampleStore sampleStore,
+                DataStore.PlateStore plates)
         {
             NavigationStore = navigationStore;
             ModalNavigationStore = modalNavigationStore;
+            SampleStore = sampleStore;
             PlateStore = plates;
-            AllVms = new ObservableCollection<ConditionSetVm>(
-                Models.TestData.ConditionSets.TestConditionSets.Select
-                 (cs => new ConditionSetVm(cs)));
+            AllPropertySetVms = new ObservableCollection<PropertySetVm>(
+                Models.TestData._PropertySets.TestPropertySets.Select
+                 (cs => new PropertySetVm(cs)));
+            _selectedVm = AllPropertySetVms.FirstOrDefault();
+            _selectedChosenVm = null;
+            _addCommand = new RelayCommand(AddAction, CanAdd);
+            _removeCommand = new RelayCommand(RemoveAction, CanRemove);
+            _createSamplesCommand = new RelayCommand(CreateSamplesAction, CanCreateSamples);
+
+            if (AllPropertySetVms.Count() > 0)
+            {
+                SelectedIndex = 0;
+            }
         }
-        DataStore.PlateStore? PlateStore { get; }
+
+        DataStore.SampleStore SampleStore { get; }
+        DataStore.PlateStore PlateStore { get; }
 
 
-        #region AllConditionSets
-        public ObservableCollection<ConditionSetVm> AllVms { get; }
-            = new ObservableCollection<ConditionSetVm>();
+        #region AllPropertySets
+        public ObservableCollection<PropertySetVm> AllPropertySetVms { get; }
+            = new ObservableCollection<PropertySetVm>();
 
-        private ConditionSetVm _selectedVm;
-        public ConditionSetVm SelectedVm
+        private PropertySetVm? _selectedVm;
+        public PropertySetVm? SelectedVm
         {
             get => _selectedVm;
             set
@@ -43,7 +59,7 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        private int _selectedIndex;
+        private int _selectedIndex = -1;
         public int SelectedIndex
         {
             get => _selectedIndex;
@@ -55,15 +71,15 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion //AllConditionSets
+        #endregion //AllPropertySets
 
 
-        #region SelectedConditionSets
-        public ObservableCollection<ConditionSetVm> ChosenVms { get; }
-            = new ObservableCollection<ConditionSetVm>();
+        #region SelectedPropertySets
+        public ObservableCollection<PropertySetVm> ChosenPropertySetVms { get; }
+            = new ObservableCollection<PropertySetVm>();
 
-        private ConditionSetVm _selectedChosenVm;
-        public ConditionSetVm SelectedChosenVm
+        private PropertySetVm? _selectedChosenVm;
+        public PropertySetVm? SelectedChosenVm
         {
             get => _selectedChosenVm;
             set
@@ -72,7 +88,7 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        private int _chosenIndex;
+        private int _chosenIndex = -1;
         public int ChosenIndex
         {
             get => _chosenIndex;
@@ -84,29 +100,35 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion //SelectedConditionSets
-
+        #endregion //SelectedPropertySets
 
 
         #region AddCommand
 
-        RelayCommand? _addCommand;
+        RelayCommand _addCommand;
         public ICommand AddCommand
         {
             get
             {
-                Action aa = () =>
-                {
-                    var addVm = SelectedVm;
-                    AllVms.Remove(SelectedVm);
-                    ChosenVms.Add(addVm);
-                };
-                return _addCommand ?? (_addCommand =
-                    new RelayCommand(
-                            aa,
-                            () => SelectedIndex >= 0
-                            ));
+                return _addCommand;
             }
+        }
+
+        void AddAction()
+        {
+            if (SelectedVm == null) return;
+            var addVm = SelectedVm;
+            AllPropertySetVms.Remove(SelectedVm);
+            ChosenPropertySetVms.Add(addVm);
+            _addCommand?.NotifyCanExecuteChanged();
+            _removeCommand?.NotifyCanExecuteChanged();
+            _createSamplesCommand?.NotifyCanExecuteChanged();
+            SampleCount = getSampleCount();
+        }
+
+        bool CanAdd()
+        {
+            return SelectedIndex >= 0;
         }
 
         #endregion // AddCommand
@@ -114,29 +136,119 @@ namespace PlateWorld.ViewModels.Pages
 
         #region RemoveCommand
 
-        RelayCommand? _removeCommand;
+        RelayCommand _removeCommand;
         public ICommand RemoveCommand
         {
             get
             {
-                Action aa = () => {
-                    var rmVm = SelectedChosenVm;
-                    ChosenVms.Remove(SelectedChosenVm);
-                    AllVms.Add(rmVm);
-                };
-                return _removeCommand ?? (_removeCommand =
-                    new RelayCommand
-                    (
-                        aa,
-                        () => ChosenIndex >= 0
-                    ));
+                return _removeCommand;
             }
+        }
+
+        void RemoveAction()
+        {
+            var rmVm = SelectedChosenVm;
+            ChosenPropertySetVms.Remove(SelectedChosenVm);
+            AllPropertySetVms.Add(rmVm);
+            _addCommand?.NotifyCanExecuteChanged();
+            _removeCommand?.NotifyCanExecuteChanged();
+            _createSamplesCommand?.NotifyCanExecuteChanged();
+            SampleCount = getSampleCount();
+        }
+
+        bool CanRemove()
+        {
+            return ChosenIndex >= 0;
         }
 
         #endregion // RemoveCommand
 
 
+        #region CreateSamplesCommand
 
+        RelayCommand _createSamplesCommand;
+        public ICommand CreateSamplesCommand
+        {
+            get
+            {
+                return _createSamplesCommand;
+            }
+        }
+
+        async void CreateSamplesAction()
+        {
+            AllReadyRunning = true;
+
+            StatusMessage = "Making samples ...";
+
+
+            await MakeSamples();
+
+            StatusMessage = "Done";
+            await Task.Delay(1000);
+            StatusMessage = "";
+
+            AllReadyRunning = false;
+        }
+
+        async Task MakeSamples()
+        {
+            var firstDex = SampleStore.AllSamples.Count();
+            var ps = ChosenPropertySetVms.Select(vm => vm.PropertySet)
+                                         .AllSamples(firstDex);
+            SampleStore.AddSamples(ps);
+
+            await Task.Delay(1000);
+
+        }
+
+        private bool allReadyRunning;
+        bool AllReadyRunning 
+        { 
+            get => allReadyRunning;
+            set
+            {
+                if (allReadyRunning != value)
+                {
+                    allReadyRunning = value;
+                    _createSamplesCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        private string _statusMessage;
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set
+            {
+                SetProperty(ref _statusMessage, value);
+            }
+        }
+
+        bool CanCreateSamples()
+        {
+            return (!AllReadyRunning) && ChosenPropertySetVms.Count > 0;
+        }
+
+        #endregion // CreateSamplesCommand
+
+
+        int getSampleCount()
+        {
+            return ChosenPropertySetVms.Select(vm => vm.PropertyCount)
+                                       .Aggregate((a, x) => a * x);
+        }
+
+        private int _sampleCount;
+        public int SampleCount
+        {
+            get => _sampleCount;
+            set
+            {
+                SetProperty(ref _sampleCount, value);
+            }
+        }
 
 
         #region MoveUpCommand
@@ -146,9 +258,9 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => 
+                Action aa = () =>
                 {
-                    AllVms.Move(SelectedIndex, SelectedIndex - 1); ; 
+                    AllPropertySetVms.Move(SelectedIndex, SelectedIndex - 1); ;
                 };
                 return _moveUpCommand ?? (_moveUpCommand =
                     new RelayCommand(
@@ -168,20 +280,20 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
-                    AllVms.Move(SelectedIndex, SelectedIndex + 1);
+                Action aa = () =>
+                {
+                    AllPropertySetVms.Move(SelectedIndex, SelectedIndex + 1);
                 };
                 return _moveDownCommand ?? (_moveDownCommand =
                     new RelayCommand
                     (
                         aa,
-                        () => SelectedIndex < (AllVms.Count - 1)
+                        () => SelectedIndex < (AllPropertySetVms.Count - 1)
                     ));
             }
         }
 
         #endregion // MoveDownCommand
-
 
 
         #region NavHomeCommand
@@ -210,10 +322,12 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
+                Action aa = () =>
+                {
                     ModalNavigationStore.CurrentViewModel =
                     new NewPlatePageVm(NavigationStore,
                                        ModalNavigationStore,
+                                       SampleStore,
                                        PlateStore, NewPlateCancelCommand);
                 };
                 return _NavNewPlateCommand ?? (_NavNewPlateCommand =
@@ -234,10 +348,12 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
+                Action aa = () =>
+                {
                     NavigationStore.CurrentViewModel =
-                    new AllPlatesPageVm(NavigationStore,
-                    ModalNavigationStore, PlateStore, null);
+                        new AllPlatesPageVm(NavigationStore,
+                            ModalNavigationStore,
+                            SampleStore, PlateStore, null);
                 };
                 return _NavAllPlatesCommand ?? (_NavAllPlatesCommand =
                     new RelayCommand(
@@ -274,11 +390,13 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
+                Action aa = () =>
+                {
                     ModalNavigationStore.CurrentViewModel = null;
                     NavigationStore.CurrentViewModel =
-                    new NewSamplesPageVm(NavigationStore,
-                    ModalNavigationStore, PlateStore);
+                        new NewSamplesPageVm(
+                            NavigationStore,
+                            ModalNavigationStore, SampleStore, PlateStore);
                 };
                 return _newPlateCancelCommand ?? (_newPlateCancelCommand =
                     new RelayCommand(aa, () => true));
@@ -295,10 +413,11 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
+                Action aa = () =>
+                {
                     NavigationStore.CurrentViewModel =
                     new AllSamplesPageVm(NavigationStore,
-                    ModalNavigationStore, PlateStore);
+                    ModalNavigationStore, SampleStore, PlateStore);
                 };
                 return _navAllSamplesCommand ?? (_navAllSamplesCommand =
                     new RelayCommand(

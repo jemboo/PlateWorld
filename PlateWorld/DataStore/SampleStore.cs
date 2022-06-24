@@ -2,10 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SampleWorld.DataStore
+namespace PlateWorld.DataStore
 {
     public class SampleStore
     {
@@ -14,12 +12,13 @@ namespace SampleWorld.DataStore
         Dictionary<Guid, ISample> sampleDict { get; set; } 
             = new Dictionary<Guid, ISample>();
 
-        public void AddSamples(ISample[] samples)
+        public void AddSamples(IEnumerable<ISample> samples)
         {
-            foreach (var sample in samples)
+            var sampA = samples.ToArray();
+            foreach (var sample in sampA)
             {
                 sampleDict[sample.Id] = sample;
-                SamplesAdded?.Invoke(samples);
+                SamplesAdded?.Invoke(sampA);
             }
         }
 

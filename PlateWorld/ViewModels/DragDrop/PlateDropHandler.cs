@@ -4,10 +4,7 @@ using PlateWorld.ViewModels.PlateParts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace PlateWorld.ViewModels.DragDrop
@@ -20,8 +17,16 @@ namespace PlateWorld.ViewModels.DragDrop
             var wrapper = GetSerializableWrapper(dropInfo);
             if (wrapper != null && dropInfo.TargetCollection != null)
             {
-                dropInfo.Effects = ShouldCopyData(dropInfo, wrapper.DragDropCopyKeyState) ? DragDropEffects.Copy : DragDropEffects.Move;
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                if(ShouldCopyData(dropInfo, wrapper.DragDropCopyKeyState))
+                {
+                    dropInfo.Effects = DragDropEffects.Copy;
+                    dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                }
+                else
+                {
+                    dropInfo.Effects = DragDropEffects.None;
+                   // dropInfo.DropTargetAdorner = DropTargetAdorners.;
+                }
             }
         }
 
@@ -35,7 +40,6 @@ namespace PlateWorld.ViewModels.DragDrop
             }
 
             // at this point the drag info can be null, cause the other app doesn't know it
-
             var insertIndex = dropInfo.UnfilteredInsertIndex;
             var destinationList = dropInfo.TargetCollection.TryGetList();
             var data = wrapper.Items.ToList();
@@ -55,10 +59,12 @@ namespace PlateWorld.ViewModels.DragDrop
                             var index = sourceList.IndexOf(o);
                             if (index != -1)
                             {
-                                sourceList.RemoveAt(index);
+                               // sourceList.RemoveAt(index);
 
                                 // so, is the source list the destination list too ?
-                                if (destinationList != null && Equals(sourceList, destinationList) && index < insertIndex)
+                                if (destinationList != null && 
+                                    Equals(sourceList, destinationList) && 
+                                    index < insertIndex)
                                 {
                                     --insertIndex;
                                 }
@@ -73,7 +79,8 @@ namespace PlateWorld.ViewModels.DragDrop
                 var objects2Insert = new List<object>();
 
                 // check for cloning
-                var cloneData = dropInfo.Effects.HasFlag(DragDropEffects.Copy) || dropInfo.Effects.HasFlag(DragDropEffects.Link);
+                var cloneData = dropInfo.Effects.HasFlag(DragDropEffects.Copy) || 
+                    dropInfo.Effects.HasFlag(DragDropEffects.Link);
 
                 foreach (var o in data)
                 {
@@ -103,8 +110,33 @@ namespace PlateWorld.ViewModels.DragDrop
                     }
                     else
                     {
+                        var destWellVm = destinationList[insertIndex] as WellVm;
+                        var srcSampleVm = obj2Insert as SampleVm;
+                        if((srcSampleVm != null) && (destWellVm != null))
+                        {
+                            srcSampleVm.WellCoords = destWellVm.Well.WellCoords;
+                            srcSampleVm.PlateName = destWellVm.PlateName;
+                            destWellVm.SampleVm = srcSampleVm;
+                            destWellVm.IsSelected = true;
+                            srcSampleVm.Update();
+                            destWellVm.Update(destWellVm);
+                            return;
+                        }
+                        var srcWellVm = obj2Insert as WellVm;
+                        if ((srcWellVm != null) && (destWellVm != null))
+                        {
+                            if (srcWellVm.SampleVm == null) return;
+                            srcWellVm.SampleVm.WellCoords = destWellVm.Well.WellCoords;
+                            srcWellVm.SampleVm.PlateName = destWellVm.PlateName;
+                            destWellVm.SampleVm = srcWellVm.SampleVm;
+                            srcWellVm.SampleVm = null;
+                            destWellVm.IsSelected = true;
+                            srcWellVm.Update(srcWellVm);
+                            destWellVm.Update(destWellVm);
+                            return;
+                        }
 
-                        destinationList.Insert(insertIndex++, obj2Insert);
+
                     }
                 }
 
@@ -121,7 +153,9 @@ namespace PlateWorld.ViewModels.DragDrop
 
             if (sourceIndex != destinationIndex)
             {
-                var method = list.GetType().GetMethod("Move", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                var method = list.GetType().GetMethod(
+                    "Move", 
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
                 _ = method?.Invoke(list, new object[] { sourceIndex, destinationIndex });
             }
         }
@@ -133,7 +167,8 @@ namespace PlateWorld.ViewModels.DragDrop
             if (data is DataObject dataObject)
             {
                 var dataFormat = DataFormats.GetDataFormat(DataFormats.Serializable);
-                data = dataObject.GetDataPresent(dataFormat.Name) ? dataObject.GetData(dataFormat.Name) : data;
+                data = dataObject.GetDataPresent(dataFormat.Name) ? 
+                    dataObject.GetData(dataFormat.Name) : data;
             }
 
             var wrapper = data as SerializableWrapper;
@@ -142,15 +177,31 @@ namespace PlateWorld.ViewModels.DragDrop
 
         private static bool ShouldCopyData(IDropInfo dropInfo, DragDropKeyStates dragDropCopyKeyState)
         {
+            var wellVms = new List<WellVm>();
+            foreach (var oobj in dropInfo.TargetCollection)
+            {
+                var wvm = oobj as WellVm;
+                wellVms.Add(wvm);
+                if (wvm != null)
+                {
+                    wvm.IsSelected = false;
+                }
+            }
+            var selWellVm = wellVms[dropInfo.InsertIndex];
+            if (selWellVm != null)
+            {
+                if (selWellVm.SampleVm != null)
+                {
+                    return false;
+                }
+            }
             // default should always the move action/effect
             if (dropInfo == null)
             {
                 return false;
             }
-
-            var copyData = ((dragDropCopyKeyState != default) && dropInfo.KeyStates.HasFlag(dragDropCopyKeyState))
-                           || dragDropCopyKeyState.HasFlag(DragDropKeyStates.LeftMouseButton);
-            return copyData;
+            selWellVm.IsSelected = true;
+            return true;
         }
     }
 

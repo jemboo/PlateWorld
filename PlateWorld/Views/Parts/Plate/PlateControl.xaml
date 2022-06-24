@@ -27,7 +27,7 @@
         <Border Grid.ColumnSpan="3" Grid.RowSpan="3" CornerRadius="4" 
                 Background="#F888" BorderBrush="DarkGray" BorderThickness="1" Margin="1,1,0,0"/>
 
-        <Image Width="32" Height="32" Source="/Views/Parts/Plate/pongki.png" 
+        <Image Width="32" Height="32" Source="/Assets/pongki.png" 
                HorizontalAlignment="Center" 
                VerticalAlignment="Center" Margin="3,3,0,0"/>
         <views:PlateMarginControl x:Name="ColHdr"

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace PlateWorld.Models.SamplePlate
 {
@@ -14,21 +10,25 @@ namespace PlateWorld.Models.SamplePlate
             Row = row;
             Column = column;
         }
-
         public int Row { get; }
         public int Column { get; }
-
     }
 
     public static class WellCoordsExt
     {
+        public static string ToWellName(this WellCoords? wc)
+        {
+            if (wc == null) return String.Empty;
+            return $"{wc?.Row.ColumnIndexToSymbol()}{wc?.Column}";
+        }
         public static string ToWellName(this WellCoords wc)
         {
             return $"{wc.Row.ColumnIndexToSymbol()}{wc.Column}";
         }
 
-        public static WellCoords ToWellCoords(this string wellName)
+        public static WellCoords? ToWellCoords(this string wellName)
         {
+            if(string.IsNullOrEmpty(wellName)) return null;
             var coords = wellName.SplitCoordName();
             return new WellCoords(row: coords.Item1, column: coords.Item2);
         }

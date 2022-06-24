@@ -25,7 +25,7 @@
                 Margin="0,0,0,15"
                 Text="Home"/>
             <Image Grid.Row="1" Margin="80" 
-                   Source="/Views/Pages/PongkiAndRudi.PNG" />
+                   Source="/Assets/PongkiAndRudi.PNG" />
         </Grid>
 
     </Grid>

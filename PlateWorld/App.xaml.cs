@@ -13,14 +13,16 @@ namespace PlateWorld
         MainWindow _mainWindow; 
         NavigationStore _navigationStore;
         ModalNavigationStore _modalNavigationStore;
-        PlateStore _plates;
+        PlateStore _plateStore;
+        SampleStore _sampleStore;
         public App()
         {
             _navigationStore = new NavigationStore();
             _modalNavigationStore = new ModalNavigationStore();
-            _plates = new PlateStore(); 
+            _plateStore = new PlateStore();
+            _sampleStore = new SampleStore();
             var mainVm = new MainViewModel(_navigationStore, _modalNavigationStore);
-            var startingVm = new HomePageVm(_navigationStore, _modalNavigationStore, _plates);
+            var startingVm = new HomePageVm(_navigationStore, _modalNavigationStore, _sampleStore, _plateStore);
             _mainWindow = new MainWindow();
             _mainWindow.DataContext = mainVm;
             _navigationStore.CurrentViewModel = startingVm;

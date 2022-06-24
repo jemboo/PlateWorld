@@ -34,7 +34,9 @@ namespace PlateWorld.ViewModels.DragDrop
         /// <inheritdoc />
         public bool CanStartDrag(IDragInfo dragInfo)
         {
-            return true;
+            var src = dragInfo.SourceItem as WellVm;
+            if (src == null) return false;
+            return src.ContainsSample;
         }
 
         /// <inheritdoc />

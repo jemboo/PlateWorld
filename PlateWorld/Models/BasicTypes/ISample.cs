@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using PlateWorld.Models.SamplePlate;
 
 namespace PlateWorld.Models.BasicTypes
 {
@@ -7,9 +8,11 @@ namespace PlateWorld.Models.BasicTypes
     {
         Guid Id { get; }
         string Name { get; }
-        IEnumerable<Property> SampleProperties { get; }
-        Property GetProperty(string name);
-        ISample SetProperty(Property value);
-        ISample ChangeName(string newName);
+        string? PlateName { get; set; }
+        WellCoords? WellCoords { get; set; }
+        IEnumerable<IProperty> SampleProperties { get; }
+        IProperty GetProperty(string name);
+        //ISample SetProperty(IProperty value);
+        //ISample ChangeName(string newName);
     }
 }

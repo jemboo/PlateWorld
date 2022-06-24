@@ -2,7 +2,7 @@
 
 namespace PlateWorld.Models.BasicTypes
 {
-    public interface IConditionSet
+    public interface IPropertySet
     {
         string Name { get; }
         string Description { get; }

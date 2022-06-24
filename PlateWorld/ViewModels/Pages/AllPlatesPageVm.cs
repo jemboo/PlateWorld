@@ -3,6 +3,7 @@ using Microsoft.Toolkit.Mvvm.Input;
 using PlateWorld.Models.SamplePlate;
 using PlateWorld.Mvvm.Stores;
 using PlateWorld.ViewModels.PlateParts;
+using PlateWorld.ViewModels.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,20 +16,24 @@ namespace PlateWorld.ViewModels.Pages
     {
         NavigationStore NavigationStore { get; }
         ModalNavigationStore ModalNavigationStore { get; }
-        public AllPlatesPageVm(NavigationStore navigationStore, 
-                               ModalNavigationStore modalNavigationStore,
-                               DataStore.PlateStore plateStore, 
-                               IPlate? selectedPlate)
+        public AllPlatesPageVm(
+                NavigationStore navigationStore, 
+                ModalNavigationStore modalNavigationStore,
+                DataStore.SampleStore sampleStore,
+                DataStore.PlateStore plateStore, 
+                IPlate? selectedPlate)
         {
             NavigationStore = navigationStore;
             ModalNavigationStore = modalNavigationStore;
             PlateStore = plateStore;
-
             if(PlateStore != null)
             {
                 PlateVms = new ObservableCollection<PlateVm>(
-                    PlateStore.AllPlates.Select(p => p.ToPlateVm(PlateStore)));
+                    PlateStore.AllPlates.Select(
+                        p => p.ToPlateVm(PlateStore)));
             }
+            SampleStore = sampleStore;
+
             if (selectedPlate == null)
             {
                 var firstPlate = PlateStore?.AllPlates.FirstOrDefault();
@@ -45,10 +50,13 @@ namespace PlateWorld.ViewModels.Pages
             {
                 SelectedPlateVm = selectedPlate.ToPlateVm(PlateStore);
             }
-
             _navAddSamplesToPlateCommand?.NotifyCanExecuteChanged();
         }
 
+        public bool NeedsSampleUpdate { get; set; }
+        public bool NeedsPlateUpdate { get; set; }
+
+        DataStore.SampleStore SampleStore { get; }
         DataStore.PlateStore? PlateStore { get; }
 
         private PlateVm _selectedPlateVm;
@@ -79,8 +87,6 @@ namespace PlateWorld.ViewModels.Pages
                 SetProperty(ref _selectedIndex, value);
             }
         }
-
-
 
         public ObservableCollection<PlateVm> PlateVms { get; } 
 
@@ -149,8 +155,8 @@ namespace PlateWorld.ViewModels.Pages
             {
                 Action aa = () => {
                     NavigationStore.CurrentViewModel =
-                    new HomePageVm(NavigationStore, 
-                    ModalNavigationStore, PlateStore);
+                        new HomePageVm(NavigationStore, 
+                        ModalNavigationStore, SampleStore, PlateStore);
                 };
                 return _NavHomeCommand ?? (_NavHomeCommand = 
                     new RelayCommand(
@@ -170,14 +176,23 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
-                    NavigationStore.CurrentViewModel =
-                        new AddSamplesToPlatePageVm(NavigationStore,
-                        ModalNavigationStore, PlateStore, SelectedPlateVm?.Plate);
-                };
                 return _navAddSamplesToPlateCommand ?? (_navAddSamplesToPlateCommand = 
-                    new RelayCommand( aa, () => (SelectedPlateVm != null) ));
+                    new RelayCommand(AddSamplesToPlate, CanAddSamplesToPlate));
             }
+        }
+
+        void AddSamplesToPlate()
+        {
+            NavigationStore.CurrentViewModel =
+                new AddSamplesToPlatePageVm(NavigationStore,
+                        ModalNavigationStore,
+                        SampleStore, PlateStore, SelectedPlateVm?.Plate);
+        }
+
+
+        bool CanAddSamplesToPlate()
+        {
+            return SelectedPlateVm != null;
         }
 
         #endregion // NavAddSamplesToPlateCommand
@@ -193,8 +208,9 @@ namespace PlateWorld.ViewModels.Pages
                 Action aa = () => {
                     ModalNavigationStore.CurrentViewModel = null;
                     NavigationStore.CurrentViewModel =
-                    new AllPlatesPageVm(NavigationStore,
-                    ModalNavigationStore, PlateStore, SelectedPlateVm?.Plate);
+                        new AllPlatesPageVm(NavigationStore,
+                                ModalNavigationStore, SampleStore, PlateStore, 
+                                SelectedPlateVm?.Plate);
                 };
                 return _editPlateCancelCommand ?? (_editPlateCancelCommand =
                     new RelayCommand(
@@ -217,6 +233,7 @@ namespace PlateWorld.ViewModels.Pages
                 Action aa = () => {
                     ModalNavigationStore.CurrentViewModel =
                     new NewPlatePageVm(NavigationStore, ModalNavigationStore,
+                    SampleStore,
                     PlateStore, NewPlateCancelCommand);
                 };
                 return _NavNewPlateCommand ?? (_NavNewPlateCommand =
@@ -240,8 +257,10 @@ namespace PlateWorld.ViewModels.Pages
                 Action aa = () => {
                     ModalNavigationStore.CurrentViewModel = null;
                     NavigationStore.CurrentViewModel =
-                    new AllPlatesPageVm(NavigationStore, 
-                    ModalNavigationStore, PlateStore, SelectedPlateVm.Plate);
+                        new AllPlatesPageVm(
+                            NavigationStore, 
+                            ModalNavigationStore, SampleStore, 
+                            PlateStore, SelectedPlateVm.Plate);
                 };
                 return _newPlateCancelCommand ?? (_newPlateCancelCommand =
                     new RelayCommand(
@@ -280,10 +299,11 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
+                Action aa = () => 
+                {
                     NavigationStore.CurrentViewModel =
-                    new AllSamplesPageVm(NavigationStore,
-                    ModalNavigationStore, PlateStore);
+                        new AllSamplesPageVm(NavigationStore,
+                                ModalNavigationStore, SampleStore, PlateStore);
                 };
                 return _navAllSamplesCommand ?? (_navAllSamplesCommand =
                     new RelayCommand(
@@ -291,7 +311,7 @@ namespace PlateWorld.ViewModels.Pages
                             () => true
                             ));
             }
-        }
+        }   
 
         #endregion // NavAllSamplesCommand
 
@@ -303,10 +323,11 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => {
+                Action aa = () => 
+                {
                     NavigationStore.CurrentViewModel =
-                    new NewSamplesPageVm(NavigationStore,
-                    ModalNavigationStore, PlateStore);
+                        new NewSamplesPageVm(NavigationStore,
+                        ModalNavigationStore, SampleStore, PlateStore);
                 };
                 return _navNewSamplesCommand ?? (_navNewSamplesCommand =
                     new RelayCommand(

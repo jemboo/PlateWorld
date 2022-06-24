@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
-    <Grid MaxWidth="1000" Margin="20 10">
+    <Grid Margin="10,0" VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto" />
@@ -24,20 +24,24 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
 
-        <TextBlock
-            Grid.Column="0"
-            FontSize="14"
-            Foreground="White"
-            Text="Plate viewer demo" />
-
+        <StackPanel Orientation="Horizontal" Grid.Column="0">
+ 
+            <TextBlock
+                FontSize="14"
+                Foreground="White"
+                Text="Plate viewer demo" Margin="20,0,0,0" VerticalAlignment="Center" />
+        </StackPanel>
+        
         <Button
             Grid.Column="1"
             Margin="10 0 0 0"
             Command="{Binding NavHomeCommand}"
             Content="Home" 
-            Style="{DynamicResource MenuButton}"/>
+            Style="{DynamicResource MenuButton}" />
 
         <Button
             Grid.Column="2"
@@ -75,6 +79,31 @@
             Content="Add Samples" 
             Style="{DynamicResource MenuButton}"/>
 
+        <Button
+            Grid.Column="7"
+            Margin="30 0 0 0"
+            Style="{DynamicResource SquareButtonStyle}"
+            ToolTip="Undo"
+            Background="Transparent"
+            Height="27" 
+            Width="27">
+            <Border Background="#7FFF">
+                <Image Width="25" Height="25" Source="/Assets/undo-arrow.png"/>
+            </Border>
+        </Button>
+        <Button
+            Grid.Column="8"
+            Margin="10,4"
+            Style="{DynamicResource SquareButtonStyle}" 
+            ToolTip="Redo"
+            Background="Transparent"
+            Height="27" 
+            Width="27">
+            <Border Background="#7FFF">
+            <Image Width="25" Height="25" Source="/Assets/redo-arrow.png"/>
+            </Border>
+
+        </Button>
 
     </Grid>
 </UserControl>

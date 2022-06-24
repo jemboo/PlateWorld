@@ -11,17 +11,17 @@ namespace PlateWorld.ViewModels.Pages
     }
 
 
-    //public ObservableCollection<ConditionSetVm> ConditionSetVms { get; }
-    //= new ObservableCollection<ConditionSetVm>();
+    //public ObservableCollection<PropertySetVm> PropertySetVms { get; }
+    //= new ObservableCollection<PropertySetVm>();
 
 
-    //private ConditionSetVm _selectedConditionSetVm;
-    //public ConditionSetVm SelectedConditionSetVm
+    //private PropertySetVm _selectedPropertySetVm;
+    //public PropertySetVm SelectedPropertySetVm
     //{
-    //    get => _selectedConditionSetVm;
+    //    get => _selectedPropertySetVm;
     //    set
     //    {
-    //        SetProperty(ref _selectedConditionSetVm, value);
+    //        SetProperty(ref _selectedPropertySetVm, value);
     //    }
     //}
 
@@ -47,7 +47,7 @@ namespace PlateWorld.ViewModels.Pages
     //    {
     //        Action aa = () =>
     //        {
-    //            ConditionSetVms.Move(SelectedIndex, SelectedIndex - 1); ;
+    //            PropertySetVms.Move(SelectedIndex, SelectedIndex - 1); ;
     //        };
     //        return _moveUpCommand ?? (_moveUpCommand =
     //            new RelayCommand(
@@ -68,13 +68,13 @@ namespace PlateWorld.ViewModels.Pages
     //    get
     //    {
     //        Action aa = () => {
-    //            ConditionSetVms.Move(SelectedIndex, SelectedIndex + 1);
+    //            PropertySetVms.Move(SelectedIndex, SelectedIndex + 1);
     //        };
     //        return _moveDownCommand ?? (_moveDownCommand =
     //            new RelayCommand
     //            (
     //                aa,
-    //                () => SelectedIndex < (ConditionSetVms.Count - 1)
+    //                () => SelectedIndex < (PropertySetVms.Count - 1)
     //            ));
     //    }
     //}

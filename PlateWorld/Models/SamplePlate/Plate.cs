@@ -1,32 +1,31 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Linq;
-using PlateWorld.Models.BasicTypes;
+using PlateWorld.DataStore;
 
 namespace PlateWorld.Models.SamplePlate
 {
     public class Plate : IPlate
     {
-        public Plate(Guid id, string name,
-                     int wellsPerRow,
-                     int wellsPerColumn,
-                     IEnumerable<Well> wells)
+        public Plate(Guid id, string name, int collumCount,
+                     int rowCount, IEnumerable<Well> wells)
         {
             Id = id;
             Name = name;
-            ColumnCount = wellsPerRow;
-            RowCount = wellsPerColumn;
-            Wells = PlateExt.WellSet(ColumnCount, RowCount).ToArray();
+            ColumnCount = collumCount;
+            RowCount = rowCount;
+            _wells = wells.ToArray(); // PlateExt.WellSet(rowCt: RowCount, colCt: ColumnCount, sampleStore: SampleStore).ToArray();
         }
         public Guid Id { get; }
-
         public string Name { get; }
-
         public int ColumnCount { get; }
-
         public int RowCount { get; }
 
-        public IEnumerable<Well> Wells { get; }
+        Well[] _wells;
+        public IEnumerable<Well> Wells 
+        {
+            get { return _wells; }
+        }
 
         public int UsedWells
         {
@@ -38,59 +37,40 @@ namespace PlateWorld.Models.SamplePlate
 
         public static Plate Empty
         {
-            get { return new Plate(Guid.Empty, string.Empty, 0, 0, new List<Well>()); }
+            get { return new Plate(Guid.Empty, string.Empty, 0, 0, Enumerable.Empty<Well>()); }
         }
     }
 
     public static class PlateExt
     {
-        public static Plate NewName(this IPlate plate, string newName)
+        public static Plate Update(this IPlate plate, string newName, IEnumerable<Well> newWells)
         {
-            return new Plate(id: plate.Id,
-                name: newName,
-                wellsPerRow: plate.ColumnCount,
-                wellsPerColumn: plate.RowCount,
-                wells: plate.Wells);
+            return
+                new Plate(  id: plate.Id,
+                            name: newName,
+                            collumCount: plate.ColumnCount,
+                            rowCount: plate.RowCount,
+                            newWells);
         }
-        public static Plate NewRowCount(this Plate plate, int newRowCount)
-        {
-            return new Plate(
-                id: plate.Id,
-                name: plate.Name,
-                wellsPerRow: plate.ColumnCount,
-                wellsPerColumn: plate.RowCount,
-                wells: WellSet(newRowCount, plate.RowCount).ToArray());
-        }
-        public static Plate NewColCount(this Plate plate, int newColCount)
-        {
-            return new Plate(
-                id: plate.Id,
-                name: plate.Name,
-                wellsPerRow: plate.ColumnCount,
-                wellsPerColumn: plate.RowCount,
-                wells: WellSet(plate.ColumnCount, newColCount).ToArray());
-        }
-
         public static Plate MakePlate(string plateName, int rowCount, int colCount)
         {
-            return new Plate(
-                id: Guid.NewGuid(),
-                name: plateName,
-                wellsPerRow: rowCount,
-                wellsPerColumn: colCount,
-                wells: WellSet(rowCount, colCount).ToArray());
-        }
+            var ws = PlateExt.WellSet(rowCt: rowCount, colCt: colCount);
+            return new Plate(id: Guid.NewGuid(),
+                             name: plateName,
+                             collumCount: colCount,
+                             rowCount: rowCount, ws);
+                        }
 
-        public static IEnumerable<Well> WellSet(int rows, int cols)
+        public static IEnumerable<Well> WellSet(int rowCt, int colCt)
         {
-            for (var i = 0; i < rows; i++)
+            for (var i = 0; i < rowCt; i++)
             {
-                for (var j = 0; j < cols; j++)
+                for (var j = 0; j < colCt; j++)
                 {
-                    var samp = (i + j) % 2 == 1 ?
-                        new Sample(Guid.NewGuid(), "Name", Enumerable.Empty<Property>()) :
-                        null;
-                    yield return new Well(row: i + 1, column: j + 1, sample: samp);
+                    //var samp = (i + j) % 2 == 1 ?
+                    //    new Sample(Guid.NewGuid(), "Name", Enumerable.Empty<Property>()) :
+                    //    null;
+                    yield return new Well(row: i + 1, column: j + 1, sample: null);
                 }
             }
         }

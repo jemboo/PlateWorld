@@ -22,7 +22,7 @@ namespace PlateWorld.ViewModels.DragDrop
             {
                 dropInfo.Effects = ShouldCopyData(dropInfo, wrapper.DragDropCopyKeyState) ? 
                     DragDropEffects.Copy : DragDropEffects.Move;
-                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
             }
         }
 

@@ -1,7 +1,8 @@
 using System.Linq;
 using PlateWorld.Models.TestData;
 using PlateWorld.Models.BasicTypes;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using PlateWorld.Mvvm.Utils;
 
 namespace PlateWorld.Test
 {
@@ -55,6 +56,15 @@ namespace PlateWorld.Test
 
             var allPropertySets = allSamples.GetPropertySets().ToArray();
             Assert.AreEqual(allPropertySets.Length, 3);
+        }
+
+        [TestMethod]
+        public void ObservableCollectionReplace()
+        {
+            var oc = new ObservableCollection<int>(new[] {1, 2, 3, 4});
+            var ocB = oc.Replace(3, 7, new Func<int, int, bool>((i, j) => i == j));
+
+
         }
     }
 }

@@ -3,7 +3,7 @@ using PlateWorld.Models.SamplePlate;
 using PlateWorld.ViewModels.DragDrop;
 using PlateWorld.ViewModels.Utils;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
 
@@ -18,16 +18,26 @@ namespace PlateWorld.ViewModels.PlateParts
             PlateStore = plateStore;
             _name = plate.Name;
             _validationMessage = string.Empty;
-            RowCount = Plate.RowCount;
-            ColumnCount = Plate.ColumnCount;
-            WellVms = Plate.Wells.Select(
-                w => new WellVm(w, Plate.Name, this)).ToList();
-            HorizontalMarginVm = new PlateMarginVm(Orientation.Horizontal, ColumnCount);
-            VerticalMarginVm = new PlateMarginVm(Orientation.Vertical, RowCount);
+
+            WellVms = new ObservableCollection<WellVm>();
+            ResetWellVms();
+
+            HorizontalMarginVm = new PlateMarginVm(Orientation.Horizontal, Plate.ColumnCount);
+            VerticalMarginVm = new PlateMarginVm(Orientation.Vertical, Plate.RowCount);
         }
 
-        public void Update(WellVm entity)
+        void ResetWellVms()
         {
+            WellVms.Clear();
+            foreach (var w in Plate.Wells)
+            {
+                WellVms.Add(new WellVm(w, Plate.Name, this));
+            }
+        }
+
+        public void Update(WellVm theOld, WellVm theNew)
+        {
+            CheckForChanges();
         }
 
         DataStore.PlateStore PlateStore { get; }
@@ -43,10 +53,8 @@ namespace PlateWorld.ViewModels.PlateParts
                 CheckForChanges();
             }
         }
-        public int RowCount { get; }
-        public int ColumnCount { get; }
         public IPlate Plate { get; private set; }
-        public List<WellVm> WellVms { get; private set; }
+        public ObservableCollection<WellVm> WellVms { get; private set; }
         public PlateMarginVm HorizontalMarginVm { get; }
         public PlateMarginVm VerticalMarginVm { get; }
 
@@ -63,15 +71,13 @@ namespace PlateWorld.ViewModels.PlateParts
             set
             {
                 SetProperty(ref _hasChanges, value);
-                ValidateNameChange();
             }
         }
 
         public void UndoChanges()
         {
             Name = Plate.Name;
-            WellVms = Plate.Wells.Select(
-                w => new WellVm(w, Plate.Name, this)).ToList();
+            ResetWellVms();
         }
 
         public static PlateVm Empty =>
@@ -88,7 +94,7 @@ namespace PlateWorld.ViewModels.PlateParts
         #endregion
 
 
-        void SaveChanges()
+        public void SaveChanges()
         {
             var newWells = WellVms.Select(vm => vm.Well.AddSample(vm.SampleVm?.Sample));
             var newPlate = Plate.Update(Name, newWells);

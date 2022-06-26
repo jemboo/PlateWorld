@@ -2,6 +2,7 @@
 using Microsoft.Toolkit.Mvvm.Input;
 using PlateWorld.Models.SamplePlate;
 using PlateWorld.Mvvm.Stores;
+using PlateWorld.ViewModels.Utils;
 using System;
 using System.Windows.Input;
 
@@ -9,28 +10,18 @@ namespace PlateWorld.ViewModels.Pages
 {
     public class NewPlatePageVm : ObservableObject
     {
-        NavigationStore NavigationStore { get; }
-        ModalNavigationStore ModalNavigationStore { get; }
         public NewPlatePageVm(
-            NavigationStore navigationStore, 
-            ModalNavigationStore modalNavigationStore,
-            DataStore.SampleStore sampleStore,
-            DataStore.PlateStore plateStore,
+            PageVmBundle pageVmBundle,
             ICommand cancelCommand)
         {
-            NavigationStore = navigationStore;
-            ModalNavigationStore = modalNavigationStore;
+            PageVmBundle = pageVmBundle;
             CancelCommand = cancelCommand;
-            PlateStore = plateStore;
-            SampleStore = sampleStore;
             _plateName = "plateName";
             _rowCount = 8;
             _colCount = 12;
             ValidationResult = String.Empty;
         }
-
-        DataStore.SampleStore SampleStore { get; }
-        DataStore.PlateStore PlateStore { get; }
+        PageVmBundle PageVmBundle { get; }
 
         #region CancelCommand
         public ICommand? CancelCommand { get; }
@@ -46,10 +37,9 @@ namespace PlateWorld.ViewModels.Pages
             get
             {
                 Action aa = () => {
-                    ModalNavigationStore.CurrentViewModel = null;
-                    NavigationStore.CurrentViewModel =
-                    new HomePageVm(NavigationStore, 
-                    ModalNavigationStore, SampleStore, PlateStore);
+                    PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
+                    PageVmBundle.NavigationStore.CurrentViewModel =
+                    new HomePageVm(PageVmBundle);
                 };
                 return _NavHomeCommand ?? (_NavHomeCommand =
                     new RelayCommand(
@@ -63,19 +53,11 @@ namespace PlateWorld.ViewModels.Pages
 
 
         #region NavNewPlateCommand
-
-        RelayCommand? _NavNewPlateCommand;
         public ICommand NavNewPlateCommand
         {
             get
             {
-                Action aa = () => {
-                };
-                return _NavNewPlateCommand ?? (_NavNewPlateCommand =
-                    new RelayCommand(
-                                aa,
-                                () => false
-                            ));
+                return CommandUtils.Disabled;
             }
         }
 
@@ -89,10 +71,7 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                Action aa = () => { };
-                return _navAddSamplesToPlateCommand ?? 
-                    (_navAddSamplesToPlateCommand = 
-                    new RelayCommand( aa, () => false));
+                return CommandUtils.Disabled;
             }
         }
 
@@ -106,12 +85,10 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                //ModalNavigationStore.CurrentViewModel = null;
                 Action aa = () => {
-                    ModalNavigationStore.CurrentViewModel = null;
-                    NavigationStore.CurrentViewModel =
-                    new AllPlatesPageVm(NavigationStore, 
-                    ModalNavigationStore, SampleStore, PlateStore, null);
+                    PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
+                    PageVmBundle.NavigationStore.CurrentViewModel =
+                        new AllPlatesPageVm(PageVmBundle, null);
                 };
                 return _NavAllPlatesCommand ?? (_NavAllPlatesCommand =
                     new RelayCommand( aa, () => true ));
@@ -129,9 +106,8 @@ namespace PlateWorld.ViewModels.Pages
             get
             {
                 Action aa = () => {
-                    NavigationStore.CurrentViewModel =
-                    new AllSamplesPageVm(NavigationStore,
-                    ModalNavigationStore, SampleStore, PlateStore);
+                    PageVmBundle.NavigationStore.CurrentViewModel =
+                    new AllSamplesPageVm(PageVmBundle);
                 };
                 return _navAllSamplesCommand ?? (_navAllSamplesCommand =
                     new RelayCommand(
@@ -152,9 +128,8 @@ namespace PlateWorld.ViewModels.Pages
             get
             {
                 Action aa = () => {
-                    NavigationStore.CurrentViewModel =
-                        new NewSamplesPageVm(NavigationStore,
-                        ModalNavigationStore, SampleStore, PlateStore);
+                    PageVmBundle.NavigationStore.CurrentViewModel =
+                        new NewSamplesPageVm(PageVmBundle);
                 };
                 return _navNewSamplesCommand ?? (_navNewSamplesCommand =
                     new RelayCommand(
@@ -224,13 +199,11 @@ namespace PlateWorld.ViewModels.Pages
                             plateName: PlateName,
                             rowCount: RowCount,
                             colCount: ColCount);
-                    PlateStore.AddPlates(new[] { newPlate });
+                    PageVmBundle.PlateStore.AddPlates(new[] { newPlate });
 
-                    ModalNavigationStore.CurrentViewModel = null;
-                    NavigationStore.CurrentViewModel = 
-                        new AddSamplesToPlatePageVm(
-                                NavigationStore, ModalNavigationStore,
-                                SampleStore, PlateStore, newPlate);
+                    PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
+                    PageVmBundle.NavigationStore.CurrentViewModel = 
+                        new AddSamplesToPlatePageVm(PageVmBundle, newPlate);
                 };
                 return _submitCommand ?? 
                        (_submitCommand = new RelayCommand(aa, () => Validate() ));
@@ -254,7 +227,7 @@ namespace PlateWorld.ViewModels.Pages
                 ValidationResult = $"Row count must be between 4 and 48";
                 return false;
             }
-            if (PlateStore.ContainsPlateName(PlateName))
+            if (PageVmBundle.PlateStore.ContainsPlateName(PlateName))
             {
                 ValidationResult = $"Plate name is already in use";
                 return false;

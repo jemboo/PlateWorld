@@ -55,8 +55,8 @@
 
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Name" Width="3*" Binding="{Binding Name}" FontSize="16"/>
-                        <DataGridTextColumn Header="Rows" Width="*" Binding="{Binding RowCount}" FontSize="16"/>
-                        <DataGridTextColumn Header="Cols" Width="*" Binding="{Binding ColumnCount}" FontSize="16"/>
+                        <DataGridTextColumn Header="Rows" Width="*" Binding="{Binding Plate.RowCount}" FontSize="16"/>
+                        <DataGridTextColumn Header="Cols" Width="*" Binding="{Binding Plate.ColumnCount}" FontSize="16"/>
                         <DataGridTextColumn Header="Used Wells" Width="*" Binding="{Binding Plate.UsedWells}" FontSize="16" />
                     </DataGrid.Columns>
                 </DataGrid>

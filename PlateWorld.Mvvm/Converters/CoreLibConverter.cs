@@ -77,6 +77,26 @@ namespace PlateWorld.Mvvm.Converters
         }
     }
 
+    public class StringToBoolConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var qua = value.GetType();
+            if (qua != typeof(string)) return false;
+            return (((string)value).ToLower() == "true");
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return DependencyProperty.UnsetValue;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
+        }
+    }
+
     public class GetTypeConverter : MarkupExtension, IValueConverter
     {
 

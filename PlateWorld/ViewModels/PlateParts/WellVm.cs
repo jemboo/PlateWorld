@@ -33,12 +33,12 @@ namespace PlateWorld.ViewModels.PlateParts
 
         IUpdater<WellVm> WellUpdater { get; }
 
-        public void Update(WellVm entity)
+        public void Update(WellVm theOld, WellVm theNew)
         {
-            WellUpdater.Update(entity);
+            WellUpdater.Update(theOld, theNew);
         }
 
-        public void Update(SampleVm entity)
+        public void Update(SampleVm theOld, SampleVm theNew)
         {
 
         }
@@ -65,7 +65,7 @@ namespace PlateWorld.ViewModels.PlateParts
         public string Text { get; }
 
         private bool _isSelected;
-        public bool IsSelected
+        public bool IsSelected2
         {
             get => _isSelected;
             set
@@ -79,4 +79,7 @@ namespace PlateWorld.ViewModels.PlateParts
             get => SampleVm != null;
         }
     }
+
+
+
 }

@@ -8,12 +8,12 @@ namespace PlateWorld.ViewModels.Utils
 {
     public interface IUpdater<T>
     {
-        void Update(T entity);
+        void Update(T theOld, T theNew);
     }
 
     public class DontUpdate<T> : IUpdater<T>
     {
-        public void Update(T entity)
+        public void Update(T theOld, T theNew)
         {
 
         }

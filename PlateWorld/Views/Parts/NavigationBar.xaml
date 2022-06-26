@@ -29,7 +29,6 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Orientation="Horizontal" Grid.Column="0">
- 
             <TextBlock
                 FontSize="14"
                 Foreground="White"
@@ -80,6 +79,7 @@
             Style="{DynamicResource MenuButton}"/>
 
         <Button
+            Command="{Binding PageVmBundle.UndoRedoService.UndoCommand}"
             Grid.Column="7"
             Margin="30 0 0 0"
             Style="{DynamicResource SquareButtonStyle}"
@@ -92,6 +92,7 @@
             </Border>
         </Button>
         <Button
+            Command="{Binding PageVmBundle.UndoRedoService.RedoCommand}"
             Grid.Column="8"
             Margin="10,4"
             Style="{DynamicResource SquareButtonStyle}" 

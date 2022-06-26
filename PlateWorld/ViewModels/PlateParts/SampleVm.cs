@@ -25,7 +25,7 @@ namespace PlateWorld.ViewModels.PlateParts
 
         public void Update()
         {
-            _sampleVmUpdater.Update(this);
+            _sampleVmUpdater.Update(this, this);
         }
 
         private string _sampleName;

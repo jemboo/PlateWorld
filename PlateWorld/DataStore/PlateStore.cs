@@ -9,10 +9,10 @@ namespace PlateWorld.DataStore
     {
         public event Action<IPlate[]> PlatesAdded;
         public event Action<IPlate[]> PlatesRemoved;
-        Dictionary<Guid, Plate> plateDict { get; set; } 
-            = new Dictionary<Guid, Plate>();
+        Dictionary<Guid, IPlate> plateDict { get; set; } 
+            = new Dictionary<Guid, IPlate>();
 
-        public void AddPlates(Plate[] plates)
+        public void AddPlates(IPlate[] plates)
         {
             foreach (var plate in plates)
             {
@@ -30,7 +30,7 @@ namespace PlateWorld.DataStore
         {
             return plateDict.Values.Any(p => p.Name == plateName);
         }
-        public IEnumerable<Plate> AllPlates 
+        public IEnumerable<IPlate> AllPlates 
         {
             get { return plateDict.Values; }
         }

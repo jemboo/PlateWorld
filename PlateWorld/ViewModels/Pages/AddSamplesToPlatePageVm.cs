@@ -1,76 +1,64 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Xaml.Behaviors;
 using PlateWorld.Models.BasicTypes;
 using PlateWorld.Models.SamplePlate;
-using PlateWorld.Mvvm.Stores;
 using PlateWorld.ViewModels.DragDrop;
 using PlateWorld.ViewModels.PlateParts;
 using PlateWorld.ViewModels.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace PlateWorld.ViewModels.Pages
 {
-    public class AddSamplesToPlatePageVm : ObservableObject, 
-                    IUpdater<SampleVm>, IUpdater<WellVm>
+    public class AddSamplesToPlatePageVm : ObservableObject
     {
-        public SamplesDragHandler SamplesDragHandler { get; set; } 
+        public SamplesDragHandler SamplesDragHandler { get; } 
             = new SamplesDragHandler();
 
-        public SamplesDropHandler SamplesDropHandler { get; set; } 
+        public SamplesDropHandler SamplesDropHandler { get; } 
             = new SamplesDropHandler();
 
-        public AddSamplesToPlatePageVm(
-                PageVmBundle pageVmBundle,
-                IPlate? plate)
+        public AddSamplesToPlatePageVm(PageVmBundle pageVmBundle,
+                                       IPlate plate)
         {
             PageVmBundle = pageVmBundle;
             if (PageVmBundle.SampleStore != null)
             {
                 _sampleVms = new ObservableCollection<SampleVm>(
                     PageVmBundle.SampleStore.AllSamples.Select(
-                            s => s.ToSampleVm(this)));
+                            s => s.ToSampleVm()));
                 var propTypes = PageVmBundle.SampleStore.AllSamples.GetPropertySets()
-                                           .Select(ps => ps.PropertyType)
-                                           .ToList();
+                                            .Select(ps => ps.PropertyType)
+                                            .ToList();
                 var fixedCols = SampleVmExt.FixedColumnInfo;
                 var extraCols = propTypes.MakeDataGridColumnInfo("SampleProperties");
                 ColumnInfo = fixedCols.Concat(extraCols).ToList();
-
             }
+
             Plate = plate;
-            _plateName = (plate == null) ? String.Empty : plate.Name;
             _validationResult = String.Empty;
 
             Zoom = 2;
             if (Plate != null)
             {
-                PlateVm = new PlateVm(Plate, PageVmBundle.PlateStore);
+                PlateVm = new PlateVm(Plate, PageVmBundle.PlateStore, 
+                    PageVmBundle.UndoRedoService);
                 if (Plate.RowCount > 20)
                 {
                     Zoom = 1;
                 }
             }
         }
+
         public PageVmBundle PageVmBundle { get; }
-
-        public void Update(WellVm theOld, WellVm theNew)
-        {
-            NeedsPlateUpdate = true; 
-            NotifyCommands();
-        }
-
-        public void Update(SampleVm theOld, SampleVm theNew)
-        {
-            NeedsSampleUpdate = true;
-            NotifyCommands();
-        }
-
-        public bool NeedsSampleUpdate { get; set; }
-        public bool NeedsPlateUpdate { get; set; }
 
         List<DataGridColumnInfo> _columnInfo;
         public List<DataGridColumnInfo> ColumnInfo
@@ -82,17 +70,29 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-
         IPlate? Plate { get; }
 
-        private PlateVm? _plateVm;
+        PlateVm? _plateVm;
         public PlateVm? PlateVm
         {
             get => _plateVm;
             set
             {
+                if (_plateVm != null)
+                {
+                    _plateVm.PropertyChanged -= _plateVm_PropertyChanged;
+                }
                 SetProperty(ref _plateVm, value);
+                if (_plateVm != null)
+                {
+                    _plateVm.PropertyChanged += _plateVm_PropertyChanged;
+                }
             }
+        }
+
+        private void _plateVm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            NotifyCommands();
         }
 
         private double _zoom;
@@ -105,24 +105,11 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-
         ObservableCollection<SampleVm> _sampleVms;
         public ObservableCollection<SampleVm> SampleVms
         {
             get { return _sampleVms; }
         }
-
-        private string _plateName;
-        public string PlateName
-        {
-            get => _plateName;
-            set
-            {
-                SetProperty(ref _plateName, value);
-                NotifyCommands();
-            }
-        }
-
 
         private string _validationResult;
         public string ValidationResult
@@ -146,6 +133,18 @@ namespace PlateWorld.ViewModels.Pages
             _navNewSamplesCommand?.NotifyCanExecuteChanged();
         }
 
+        void NavBack()
+        {
+            PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
+            PageVmBundle.NavigationStore.CurrentViewModel =
+                new AddSamplesToPlatePageVm(PageVmBundle, Plate);
+        }
+
+        void NavBackAndPop()
+        {
+            PageVmBundle.UndoRedoService.PopUndo();
+            NavBack();
+        }
 
         #region NavBackCommand
 
@@ -156,17 +155,10 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navBackCommand == null)
                 {
-                    _navBackCommand = new RelayCommand(NavBack, () => true);
+                    _navBackCommand = new RelayCommand(NavBackAndPop, () => true);
                 }
                 return _navBackCommand;
             }
-        }
-
-        void NavBack()
-        {
-            PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
-            PageVmBundle.NavigationStore.CurrentViewModel = 
-                new AddSamplesToPlatePageVm(PageVmBundle, Plate);
         }
 
         #endregion // NavBackCommand
@@ -179,40 +171,23 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
-                return _savePlateCommand ?? 
-                       (_savePlateCommand = new RelayCommand(SaveThePlate, Validate));
+                if(_savePlateCommand == null)
+                {
+                    _savePlateCommand = new RelayCommand(SaveThePlate, CanSavePlate);
+                }
+                return _savePlateCommand;
             }
         }
 
         void SaveThePlate()
         {
-            //var newPlate = Plate?.NewName(newName: PlateName);
-            //PlateStore.AddPlates(new[] { newPlate });
-
-            NeedsSampleUpdate = false;
-            NeedsPlateUpdate = false;
+            PlateVm.SaveChanges();
             NotifyCommands();
         }
 
-        bool EditsWereMade()
+        bool CanSavePlate()
         {
-            return (Plate?.Name != PlateName) ||
-                    NeedsSampleUpdate ||
-                    NeedsPlateUpdate;
-        }
-
-        bool Validate()
-        {
-            if (!EditsWereMade()) return false;
-
-            if ((Plate?.Name != PlateName) &&
-                (PageVmBundle.PlateStore.ContainsPlateName(PlateName)))
-            {
-                ValidationResult = $"Plate name is already in use";
-                return false;
-            }
-            ValidationResult = String.Empty;
-            return true;
+            return PlateVm.HasChanges;
         }
 
         #endregion // SavePlateCommand
@@ -237,8 +212,7 @@ namespace PlateWorld.ViewModels.Pages
 
         bool CanClearChanges()
         {
-            var res = Validate();
-            return res;
+            return PlateVm.HasChanges;
         }
         #endregion // ClearChangesCommand
 
@@ -252,7 +226,7 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navHomeCommand == null)
                 {
-                    _navHomeCommand = new RelayCommand(NavHome, () => !EditsWereMade());
+                    _navHomeCommand = new RelayCommand(NavHome, CanNavHome);
                 }
                 return _navHomeCommand;
             }
@@ -263,7 +237,14 @@ namespace PlateWorld.ViewModels.Pages
                     PageVmBundle.NavigationStore.CurrentViewModel =
                                 new HomePageVm(PageVmBundle);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Add Samples to Plate", 
+                action, "Go to Home");
+        }
+
+        bool CanNavHome()
+        {
+            return PlateVm.HasChanges;
         }
 
         #endregion // NavHomeCommand
@@ -278,7 +259,7 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navNewPlateCommand == null)
                 {
-                    _navNewPlateCommand = new RelayCommand(NavNewPlate, () => !EditsWereMade());
+                    _navNewPlateCommand = new RelayCommand(NavNewPlate, CanNavNewPlate);
                 }
                 return _navNewPlateCommand;
             }
@@ -290,7 +271,14 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.ModalNavigationStore.CurrentViewModel =
                             new NewPlatePageVm(PageVmBundle, NavBackCommand);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Add Samples to Plate", 
+                action, "Go to Make new Plate" );
+        }
+
+        bool CanNavNewPlate()
+        {
+            return PlateVm.HasChanges;
         }
 
         #endregion // NavNewPlateCommand
@@ -319,7 +307,8 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navAllPlatesCommand == null)
                 {
-                    _navAllPlatesCommand = new RelayCommand(NavAllPlates, () => !EditsWereMade());
+                    _navAllPlatesCommand = new RelayCommand(
+                        NavAllPlates, CanNavAllPlates);
                 }
                 return _navAllPlatesCommand;
             }
@@ -331,9 +320,15 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.NavigationStore.CurrentViewModel =
                             new AllPlatesPageVm(PageVmBundle, null);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Add Samples to Plate", 
+                action, "Go to All Plates");
         }
 
+        bool CanNavAllPlates()
+        {
+            return PlateVm.HasChanges;
+        }
 
         #endregion // NavAllPlatesCommand
 
@@ -347,7 +342,8 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navAllSamplesCommand == null)
                 {
-                    _navAllSamplesCommand = new RelayCommand(NavAllSamples, () => !EditsWereMade());
+                    _navAllSamplesCommand = new RelayCommand(
+                        NavAllSamples, CanNavAllSamples);
                 }
                 return _navAllSamplesCommand;
             }
@@ -359,7 +355,14 @@ namespace PlateWorld.ViewModels.Pages
                  PageVmBundle.NavigationStore.CurrentViewModel =
                         new AllSamplesPageVm(PageVmBundle);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Add Samples to Plate", 
+                action, "Go to All Samples");
+        }
+
+        bool CanNavAllSamples()
+        {
+            return PlateVm.HasChanges;
         }
 
         #endregion // NavAllSamplesCommand
@@ -374,7 +377,7 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navNewSamplesCommand == null)
                 {
-                    _navNewSamplesCommand = new RelayCommand(NavNewSamples, () => !EditsWereMade());
+                    _navNewSamplesCommand = new RelayCommand(NavNewSamples, CanNavNewSamples);
                 }
                 return _navNewSamplesCommand;
             }
@@ -386,10 +389,61 @@ namespace PlateWorld.ViewModels.Pages
                  PageVmBundle.NavigationStore.CurrentViewModel =
                         new NewSamplesPageVm(PageVmBundle);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Add Samples to Plate", 
+                action, "Go to Make new Samples");
         }
+
+        bool CanNavNewSamples()
+        {
+            return PlateVm.HasChanges;
+        }
+
         #endregion // NavNewSamplesCommand
 
 
+    }
+}
+
+
+
+
+public class DataGridSelectedItemsBlendBehavior : Behavior<DataGrid>
+{
+    public static readonly DependencyProperty SelectedItemsProperty =
+        DependencyProperty.Register("SelectedItems", typeof(object),
+        typeof(DataGridSelectedItemsBlendBehavior),
+        new FrameworkPropertyMetadata(null) { BindsTwoWayByDefault = true });
+
+    public IList SelectedItems
+    {
+        get { return (IList)GetValue(SelectedItemsProperty); }
+        set { SetValue(SelectedItemsProperty, value); }
+    }
+
+    protected override void OnAttached()
+    {
+        base.OnAttached();
+        this.AssociatedObject.SelectionChanged += OnSelectionChanged;
+    }
+
+    protected override void OnDetaching()
+    {
+        base.OnDetaching();
+        if (this.AssociatedObject != null)
+            this.AssociatedObject.SelectionChanged -= OnSelectionChanged;
+    }
+
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (SelectedItems != null)
+        {
+            foreach (var selectedItem in e.AddedItems)
+                if (!SelectedItems.Contains(selectedItem))
+                    SelectedItems.Add(selectedItem);
+
+            foreach (var unselectedItem in e.RemovedItems)
+                SelectedItems.Remove(unselectedItem);
+        }
     }
 }

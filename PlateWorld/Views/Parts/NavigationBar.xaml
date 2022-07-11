@@ -80,10 +80,10 @@
 
         <Button
             Command="{Binding PageVmBundle.UndoRedoService.UndoCommand}"
+            ToolTip="{Binding PageVmBundle.UndoRedoService.UndoDescr}"
             Grid.Column="7"
             Margin="30 0 0 0"
             Style="{DynamicResource SquareButtonStyle}"
-            ToolTip="Undo"
             Background="Transparent"
             Height="27" 
             Width="27">
@@ -93,10 +93,10 @@
         </Button>
         <Button
             Command="{Binding PageVmBundle.UndoRedoService.RedoCommand}"
+            ToolTip="{Binding PageVmBundle.UndoRedoService.RedoDescr}"
             Grid.Column="8"
             Margin="10,4"
-            Style="{DynamicResource SquareButtonStyle}" 
-            ToolTip="Redo"
+            Style="{DynamicResource SquareButtonStyle}"
             Background="Transparent"
             Height="27" 
             Width="27">

@@ -17,7 +17,6 @@ namespace PlateWorld
             _mainWindow = new MainWindow();
             _mainWindow.DataContext = mainVm;
             _pageVmBundle.NavigationStore.CurrentViewModel = startingVm;
-            
         }
 
         protected override void OnStartup(StartupEventArgs e)

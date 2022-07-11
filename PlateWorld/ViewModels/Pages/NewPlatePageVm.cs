@@ -1,7 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using PlateWorld.Models.SamplePlate;
-using PlateWorld.Mvvm.Stores;
 using PlateWorld.ViewModels.Utils;
 using System;
 using System.Windows.Input;
@@ -11,8 +10,8 @@ namespace PlateWorld.ViewModels.Pages
     public class NewPlatePageVm : ObservableObject
     {
         public NewPlatePageVm(
-            PageVmBundle pageVmBundle,
-            ICommand cancelCommand)
+                    PageVmBundle pageVmBundle,
+                    ICommand cancelCommand)
         {
             PageVmBundle = pageVmBundle;
             CancelCommand = cancelCommand;
@@ -27,120 +26,6 @@ namespace PlateWorld.ViewModels.Pages
         public ICommand? CancelCommand { get; }
 
         #endregion
-
-
-        #region NavHomeCommand
-
-        RelayCommand? _NavHomeCommand;
-        public ICommand NavHomeCommand
-        {
-            get
-            {
-                Action aa = () => {
-                    PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
-                    PageVmBundle.NavigationStore.CurrentViewModel =
-                    new HomePageVm(PageVmBundle);
-                };
-                return _NavHomeCommand ?? (_NavHomeCommand =
-                    new RelayCommand(
-                            aa,
-                            () => true
-                            ));
-            }
-        }
-
-        #endregion // NavHomeCommand
-
-
-        #region NavNewPlateCommand
-        public ICommand NavNewPlateCommand
-        {
-            get
-            {
-                return CommandUtils.Disabled;
-            }
-        }
-
-        #endregion // NavNewPlateCommand
-
-
-        #region NavAddSamplesToPlateCommand
-
-        RelayCommand? _navAddSamplesToPlateCommand;
-        public ICommand NavAddSamplesToPlateCommand
-        {
-            get
-            {
-                return CommandUtils.Disabled;
-            }
-        }
-
-        #endregion // NavAddSamplesToPlateCommand
-
-
-        #region NavAllPlatesCommand
-
-        RelayCommand? _NavAllPlatesCommand;
-        public ICommand NavAllPlatesCommand
-        {
-            get
-            {
-                Action aa = () => {
-                    PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
-                    PageVmBundle.NavigationStore.CurrentViewModel =
-                        new AllPlatesPageVm(PageVmBundle, null);
-                };
-                return _NavAllPlatesCommand ?? (_NavAllPlatesCommand =
-                    new RelayCommand( aa, () => true ));
-            }
-        }
-
-        #endregion // NavAllPlatesCommand
-
-
-        #region NavAllSamplesCommand
-
-        RelayCommand? _navAllSamplesCommand;
-        public ICommand? NavAllSamplesCommand
-        {
-            get
-            {
-                Action aa = () => {
-                    PageVmBundle.NavigationStore.CurrentViewModel =
-                    new AllSamplesPageVm(PageVmBundle);
-                };
-                return _navAllSamplesCommand ?? (_navAllSamplesCommand =
-                    new RelayCommand(
-                            aa,
-                            () => true
-                            ));
-            }
-        }
-
-        #endregion // NavAllSamplesCommand
-
-
-        #region NavNewSamplesCommand
-
-        RelayCommand? _navNewSamplesCommand;
-        public ICommand? NavNewSamplesCommand
-        {
-            get
-            {
-                Action aa = () => {
-                    PageVmBundle.NavigationStore.CurrentViewModel =
-                        new NewSamplesPageVm(PageVmBundle);
-                };
-                return _navNewSamplesCommand ?? (_navNewSamplesCommand =
-                    new RelayCommand(
-                            aa,
-                            () => true
-                            ));
-            }
-        }
-
-        #endregion // NavNewSamplesCommand
-
 
         private string _plateName;
         public string PlateName
@@ -199,20 +84,45 @@ namespace PlateWorld.ViewModels.Pages
                             plateName: PlateName,
                             rowCount: RowCount,
                             colCount: ColCount);
-                    PageVmBundle.PlateStore.AddPlates(new[] { newPlate });
+                    PageVmBundle.PlateStore.AddPlates(new[] { newPlate } );
 
                     PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
                     PageVmBundle.NavigationStore.CurrentViewModel = 
-                        new AddSamplesToPlatePageVm(PageVmBundle, newPlate);
+                        new AllPlatesPageVm(PageVmBundle, newPlate);
                 };
                 return _submitCommand ?? 
-                       (_submitCommand = new RelayCommand(aa, () => Validate() ));
+                      (_submitCommand = new RelayCommand(NewPlateAction, () => Validate() ));
             }
         }
 
         #endregion // SubmitCommand
 
 
+        void NewPlateAction()
+        {
+            var newPlate = PlateExt.MakePlate(
+                                    plateName: PlateName,
+                                    rowCount: RowCount,
+                                    colCount: ColCount);
+
+            PageVmBundle.UndoRedoService.Push(
+                () => RemoveNewPlate(newPlate), "remove new plate",
+                () => MakeNewPlate(newPlate), "make new plate");
+        }
+
+        void MakeNewPlate(Plate plate)
+        {
+            PageVmBundle.PlateStore.AddPlates(new Plate[] { plate } );
+            PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
+            PageVmBundle.NavigationStore.CurrentViewModel =
+                new AllPlatesPageVm(PageVmBundle, plate);
+        }
+
+        void RemoveNewPlate(Plate plate)
+        {
+            PageVmBundle.PlateStore.RemovePlates(new Plate[] { plate } );
+            CancelCommand?.Execute(null);
+        }
 
         bool Validate()
         {

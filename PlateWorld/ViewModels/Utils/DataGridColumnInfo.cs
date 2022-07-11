@@ -9,7 +9,10 @@ namespace PlateWorld.ViewModels.Utils
     {
         public DataGridColumnInfo(string binding, string header)
         {
-            Binding = new Binding(binding);
+            Binding = new Binding(binding)
+            {
+                Mode = BindingMode.OneWay
+            };
             Header = header;
         }
 

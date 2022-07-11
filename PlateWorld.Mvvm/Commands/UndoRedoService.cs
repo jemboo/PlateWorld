@@ -1,11 +1,12 @@
-﻿using Microsoft.Toolkit.Mvvm.Input;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace PlateWorld.Mvvm.Commands
 {
-    public class UndoRedoService
+    public class UndoRedoService : ObservableObject
     {
         public UndoRedoService()
         {
@@ -18,13 +19,50 @@ namespace PlateWorld.Mvvm.Commands
         Stack<UndoRedoActions> _redoStack = new Stack<UndoRedoActions>();
 
 
-        public void Push(Action undo, Action redo)
+        public void Push(Action undo, string undoDescr,
+            Action redo, string redoDescr)
         {
-            var urA = new UndoRedoActions(undo, redo);
+            var urA = new UndoRedoActions(undo, undoDescr, redo, redoDescr);
             _undoStack.Push(urA);
-            redo(); 
+            _redoStack.Clear();
+            redo();
+            Notify();
+        }
+
+        void Notify()
+        {
             _undoCommand.NotifyCanExecuteChanged();
             _redoCommand.NotifyCanExecuteChanged();
+
+            this.OnPropertyChanged("UndoDescr");
+            this.OnPropertyChanged("RedoDescr");
+        }
+
+        public void PopUndo()
+        {
+            if (_undoStack.Count > 0)
+            {
+                var undo = _undoStack.Pop();
+                Notify();
+            }
+        }
+
+        #region UndoCommand
+
+        public string UndoDescr
+        {
+            get 
+            {
+                if (_undoStack.Count > 0)
+                {
+                    var undo = _undoStack.Peek();
+                    return undo.UndoDescr;
+                }
+                else
+                {
+                    return String.Empty;
+                }
+            }
         }
 
         RelayCommand _undoCommand;
@@ -44,8 +82,8 @@ namespace PlateWorld.Mvvm.Commands
                 undo.UndoAction();
                 _redoStack.Push(undo);
             }
-            _undoCommand.NotifyCanExecuteChanged();
-            _redoCommand.NotifyCanExecuteChanged();
+
+            Notify();
         }
 
         bool CanDoTheUndo()
@@ -53,6 +91,27 @@ namespace PlateWorld.Mvvm.Commands
             return (_undoStack.Count > 0);
         }
 
+        #endregion
+
+
+        #region RedoCommand
+
+
+        public string RedoDescr
+        {
+            get
+            {
+                if (_redoStack.Count > 0)
+                {
+                    var redo = _redoStack.Peek();
+                    return redo.RedoDescr;
+                }
+                else
+                {
+                    return String.Empty;
+                }
+            }
+        }
         RelayCommand _redoCommand;
         public ICommand RedoCommand
         {
@@ -70,8 +129,8 @@ namespace PlateWorld.Mvvm.Commands
                 redo.RedoAction();
                 _undoStack.Push(redo);
             }
-            _undoCommand.NotifyCanExecuteChanged();
-            _redoCommand.NotifyCanExecuteChanged();
+
+            Notify();
         }
 
         bool CanDoTheRedo()
@@ -79,5 +138,6 @@ namespace PlateWorld.Mvvm.Commands
             return (_redoStack.Count > 0);
         }
 
+        #endregion
     }
 }

@@ -47,7 +47,7 @@
 
             <Ellipse Width="26" Height="26" Stroke="DarkGray"/>
 
-            <Border Visibility="{Binding IsSelected2, Converter={StaticResource btVConv}}">
+            <Border Visibility="{Binding IsSelected, Converter={StaticResource btVConv}}">
                 <Border.Background>
                     <RadialGradientBrush>
                         <GradientStop Color="#5FFF" Offset="1" />

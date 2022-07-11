@@ -2,25 +2,25 @@
 using PlateWorld.Models.SamplePlate;
 using PlateWorld.ViewModels.Utils;
 using System;
+using System.ComponentModel;
 
 namespace PlateWorld.ViewModels.PlateParts
 {
     [Serializable]
-    public class WellVm : ObservableObject, IUpdater<WellVm>, 
-        IUpdater<SampleVm>
+    public class WellVm : ObservableObject
     {
         public WellVm(Well well, string plateName,
-                      IUpdater<WellVm> wellUpdater)
+                      Action<WellVm, WellVm, SampleVm> updato)
         {
             Well = well;
             Text = well.WellCoords.ToWellName();
+            _updato = updato;
             var sample = Well?.Sample;
             if (sample != null)
             {
-                SampleVm = sample.ToSampleVm(this);
+                SampleVm = sample.ToSampleVm();
             }
             PlateName = plateName;
-            WellUpdater = wellUpdater;
         }
 
         public bool HasChanges
@@ -31,16 +31,10 @@ namespace PlateWorld.ViewModels.PlateParts
             }
         }
 
-        IUpdater<WellVm> WellUpdater { get; }
-
-        public void Update(WellVm theOld, WellVm theNew)
+        Action<WellVm, WellVm, SampleVm> _updato;
+        public Action<WellVm, WellVm, SampleVm> Updato
         {
-            WellUpdater.Update(theOld, theNew);
-        }
-
-        public void Update(SampleVm theOld, SampleVm theNew)
-        {
-
+            get { return _updato; }
         }
 
         public bool NeedsSampleUpdate { get; set; }
@@ -57,20 +51,43 @@ namespace PlateWorld.ViewModels.PlateParts
             get => _sampleVm;
             set
             {
+                if (_sampleVm != null)
+                {
+                    _sampleVm.PropertyChanged -= _sampleVm_PropertyChanged;
+                }
                 SetProperty(ref _sampleVm, value);
-                this.OnPropertyChanged("ContainsSample");
+                if (_sampleVm != null)
+                {
+                    _sampleVm.PropertyChanged += _sampleVm_PropertyChanged;
+                }
+                OnPropertyChanged("ContainsSample");
+            }
+        }
+
+        private void _sampleVm_PropertyChanged(
+            object? sender, PropertyChangedEventArgs e)
+        {
+            var sampleVm = sender as SampleVm;
+            if (sampleVm == null) return;
+            if(e.PropertyName == "IsSelected")
+            {
+                IsSelected = sampleVm.IsSelected;
             }
         }
 
         public string Text { get; }
 
         private bool _isSelected;
-        public bool IsSelected2
+        public bool IsSelected
         {
             get => _isSelected;
             set
             {
                 SetProperty(ref _isSelected, value);
+                if(SampleVm != null)
+                {
+                    SampleVm.IsSelected = value;
+                }
             }
         }
 
@@ -79,7 +96,4 @@ namespace PlateWorld.ViewModels.PlateParts
             get => SampleVm != null;
         }
     }
-
-
-
 }

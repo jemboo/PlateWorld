@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace PlateWorld.ViewModels.Pages
 {
-    public class AllSamplesPageVm : ObservableObject, IUpdater<SampleVm>
+    public class AllSamplesPageVm : ObservableObject
     {
         public AllSamplesPageVm(PageVmBundle pageVmBundle)
         {
@@ -19,7 +19,7 @@ namespace PlateWorld.ViewModels.Pages
             if (PageVmBundle.SampleStore != null)
             {
                 _sampleVms = new ObservableCollection<SampleVm>(
-                    PageVmBundle.SampleStore.AllSamples.Select(s => s.ToSampleVm(this)));
+                    PageVmBundle.SampleStore.AllSamples.Select(s => s.ToSampleVm()));
 
                 var propTypes = PageVmBundle.SampleStore.AllSamples.GetPropertySets()
                                             .Select(ps=>ps.PropertyType)
@@ -105,7 +105,9 @@ namespace PlateWorld.ViewModels.Pages
                     PageVmBundle.NavigationStore.CurrentViewModel =
                                 new HomePageVm(PageVmBundle);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to All Samples", 
+                action, "Go to Home");
         }
 
         #endregion // NavHomeCommand
@@ -120,7 +122,8 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navBackCommand == null)
                 {
-                    _navBackCommand = new RelayCommand(NavBack, () => true);
+                    _navBackCommand 
+                        = new RelayCommand(NavBackAndPop, () => true);
                 }
                 return _navBackCommand;
             }
@@ -129,8 +132,13 @@ namespace PlateWorld.ViewModels.Pages
         void NavBack()
         {
             PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
-            PageVmBundle.NavigationStore.CurrentViewModel 
-                = new AllSamplesPageVm(PageVmBundle);
+            PageVmBundle.NavigationStore.CurrentViewModel = this;
+        }
+
+        void NavBackAndPop()
+        {
+            PageVmBundle.UndoRedoService.PopUndo();
+            NavBack();
         }
 
         #endregion // NavBackCommand
@@ -157,15 +165,17 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.ModalNavigationStore.CurrentViewModel =
                             new NewPlatePageVm(PageVmBundle, NavBackCommand);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to All Samples", 
+                action, "Go to Make new Plate");
         }
+
 
         #endregion // NavNewPlateCommand
 
 
         #region NavAddSamplesToPlateCommand
 
-        RelayCommand? _navAddSamplesToPlateCommand;
         public ICommand NavAddSamplesToPlateCommand
         {
             get
@@ -198,7 +208,9 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.NavigationStore.CurrentViewModel =
                             new AllPlatesPageVm(PageVmBundle, null);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to All Samples", 
+                action, "Go to Add Samples to Plate");
         }
 
 
@@ -239,7 +251,9 @@ namespace PlateWorld.ViewModels.Pages
                  PageVmBundle.NavigationStore.CurrentViewModel =
                         new NewSamplesPageVm(PageVmBundle);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to All Samples", 
+                action, "Go to Make new Samples");
         }
 
         #endregion // NavNewSamplesCommand

@@ -11,21 +11,23 @@ namespace PlateWorld.ViewModels.PlateParts
     [Serializable]
     public class SampleVm : ObservableObject
     {
-        public SampleVm(ISample sample, IUpdater<SampleVm> updater)
+        public SampleVm(ISample sample)
         {
             Sample = sample;
             _sampleName = sample.Name;
             PlateName = sample.PlateName;
             WellCoords = sample.WellCoords;
             SampleProperties = Sample.SampleProperties.ToList();
-            _sampleVmUpdater = updater;
         }
 
-        IUpdater<SampleVm> _sampleVmUpdater;
-
-        public void Update()
+        private bool _isSelected;
+        public bool IsSelected
         {
-            _sampleVmUpdater.Update(this, this);
+            get => _isSelected;
+            set
+            {
+                SetProperty(ref _isSelected, value);
+            }
         }
 
         private string _sampleName;
@@ -80,14 +82,14 @@ namespace PlateWorld.ViewModels.PlateParts
         public ISample Sample { get; }
 
         public static SampleVm Empty =>
-            new SampleVm(Models.BasicTypes.Sample.Empty, new DontUpdate<SampleVm>());
+            new SampleVm(Models.BasicTypes.Sample.Empty);
     }
 
     public static class SampleVmExt
     {
-        public static SampleVm ToSampleVm(this ISample sample, IUpdater<SampleVm> updater)
+        public static SampleVm ToSampleVm(this ISample sample)
         {
-            return new SampleVm(sample, updater);
+            return new SampleVm(sample);
         }
 
         public static IEnumerable<DataGridColumnInfo> FixedColumnInfo

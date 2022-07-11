@@ -31,7 +31,7 @@
     <converters:StringToBoolConverter x:Key="sbConv"/>
 
     <Style x:Key="WellItemContainerStyle" TargetType="{x:Type ListBoxItem}">
-        <Setter Property="IsSelected" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext.IsSelected2}" />
+        <Setter Property="IsSelected" Value="{Binding RelativeSource={RelativeSource Self}, Path=DataContext.IsSelected}" />
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="HorizontalContentAlignment" 
@@ -190,7 +190,6 @@
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Margin" Value="10,0"/>
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Width" Value="100"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
     </Style>
     

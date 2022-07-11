@@ -62,20 +62,30 @@
                     <TextBlock Text="Samples" Style="{DynamicResource MediumTextBlock}"/>
 
                     <parts:DynoGrid ItemsSource="{Binding SampleVms}" 
-                       Grid.Row="1"
-                       Margin="0,0,5,5"
-                       SelectionMode="Extended"
-                       AutoGenerateColumns="False"
-                       ColumnInfo="{Binding ColumnInfo}"
-                       dd:DragDrop.DragHandler="{Binding SamplesDragHandler}"
-                       dd:DragDrop.DropHandler="{Binding SamplesDropHandler}"
-                       dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}"
-                       dd:DragDrop.IsDragSource="True"
-                       dd:DragDrop.IsDropTarget="True"
-                       dd:DragDrop.EffectMoveAdornerTemplate="{StaticResource DragAdornerEffect}"
-                       dd:DragDrop.EffectCopyAdornerTemplate="{StaticResource DragAdornerEffect}"
-                       dd:DragDrop.UseDefaultEffectDataTemplate="False"
-                       dd:DragDrop.DragPreviewItemsSorter="{Binding}">
+                           Grid.Row="1"
+                           Margin="0,0,5,5"
+                           SelectionMode="Extended"
+                           AutoGenerateColumns="False"
+                           ColumnInfo="{Binding ColumnInfo}"
+                           dd:DragDrop.DragHandler="{Binding SamplesDragHandler}"
+                           dd:DragDrop.DropHandler="{Binding SamplesDropHandler}"
+                           dd:DragDrop.DragAdornerTemplate="{StaticResource DragAdorner}"
+                           dd:DragDrop.IsDragSource="True"
+                           dd:DragDrop.IsDropTarget="True"
+                           dd:DragDrop.EffectMoveAdornerTemplate="{StaticResource DragAdornerEffect}"
+                           dd:DragDrop.EffectCopyAdornerTemplate="{StaticResource DragAdornerEffect}"
+                           dd:DragDrop.UseDefaultEffectDataTemplate="False"
+                           dd:DragDrop.DragPreviewItemsSorter="{Binding}">
+
+                        <DataGrid.Resources>
+                            <Style TargetType = "DataGridRow">
+                                <Setter Property="IsSelected"
+                                    Value="{Binding IsSelected}"/>
+                            </Style>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" 
+                                    Color="LightBlue"/>
+                        </DataGrid.Resources>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Name" Width="200" Binding="{Binding SampleName}" FontSize="14"/>
                             <DataGridTextColumn Header="PlateName" Width="2*" Binding="{Binding PlateName}" FontSize="14" CanUserResize="False"/>
@@ -95,7 +105,7 @@
                             <TextBlock Text="Name" 
                     Style="{DynamicResource SmallTextBlock}" />
                         </HeaderedContentControl.Header>
-                        <TextBox Text="{Binding PlateName, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Text="{Binding PlateVm.Name, UpdateSourceTrigger=PropertyChanged}"
                      Style="{DynamicResource MediumTextBox}" />
                     </HeaderedContentControl>
                     

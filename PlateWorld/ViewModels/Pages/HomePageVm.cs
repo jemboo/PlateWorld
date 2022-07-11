@@ -50,7 +50,9 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.ModalNavigationStore.CurrentViewModel =
                             new NewPlatePageVm(PageVmBundle, NavBackCommand);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Home", 
+                action, "Go to Make new Plate");
         }
 
         #endregion // NavNewPlateCommand
@@ -78,7 +80,7 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if(_navBackCommand == null)
                 {
-                    _navBackCommand =  new RelayCommand(NavBack, () => true);
+                    _navBackCommand =  new RelayCommand(NavBackAndPop, () => true);
                 }
                 return _navBackCommand;
             }
@@ -87,8 +89,12 @@ namespace PlateWorld.ViewModels.Pages
         void NavBack()
         {
             PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
-            PageVmBundle.NavigationStore.CurrentViewModel = 
-                new HomePageVm(PageVmBundle);
+            PageVmBundle.NavigationStore.CurrentViewModel = this;
+        }
+        void NavBackAndPop()
+        {
+            PageVmBundle.UndoRedoService.PopUndo();
+            NavBack();
         }
 
         #endregion // NavBackCommand
@@ -115,7 +121,9 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.NavigationStore.CurrentViewModel =
                             new AllPlatesPageVm(PageVmBundle, null);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Home", 
+                action, "Go to All Plates");
         }
 
 
@@ -144,7 +152,9 @@ namespace PlateWorld.ViewModels.Pages
                  PageVmBundle.NavigationStore.CurrentViewModel =
                         new AllSamplesPageVm(PageVmBundle); 
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Home", 
+                action, "Go to All Samples");
         }
 
 
@@ -168,11 +178,14 @@ namespace PlateWorld.ViewModels.Pages
 
         void NavNewSamples()
         {
+            var newSamplesPageVm = new NewSamplesPageVm(PageVmBundle);
             Action action = () =>
                  PageVmBundle.NavigationStore.CurrentViewModel =
-                        new NewSamplesPageVm(PageVmBundle);
+                        newSamplesPageVm;
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Home",
+                action, "Go to Make new Samples");
         }
 
         #endregion // NavNewSamplesCommand

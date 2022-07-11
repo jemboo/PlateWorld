@@ -24,14 +24,18 @@ namespace PlateWorld.ViewModels.Pages
             _selectedChosenVm = null;
             _addCommand = new RelayCommand(AddAction, CanAdd);
             _removeCommand = new RelayCommand(RemoveAction, CanRemove);
-            _createSamplesCommand = new RelayCommand(CreateSamplesAction, CanCreateSamples);
-
             if (AllPropertySetVms.Count() > 0)
             {
                 SelectedIndex = 0;
             }
+
+            Id = Guid.NewGuid();
         }
+
+        public Guid Id { get; }
+
         public PageVmBundle PageVmBundle { get; }
+
 
         #region AllPropertySets
         public ObservableCollection<PropertySetVm> AllPropertySetVms { get; }
@@ -62,7 +66,7 @@ namespace PlateWorld.ViewModels.Pages
         #endregion //AllPropertySets
 
 
-        #region SelectedPropertySets
+        #region ChosenPropertySetVms
         public ObservableCollection<PropertySetVm> ChosenPropertySetVms { get; }
             = new ObservableCollection<PropertySetVm>();
 
@@ -88,7 +92,7 @@ namespace PlateWorld.ViewModels.Pages
             }
         }
 
-        #endregion //SelectedPropertySets
+        #endregion //ChosenPropertySetVms
 
 
         #region AddCommand
@@ -105,9 +109,30 @@ namespace PlateWorld.ViewModels.Pages
         void AddAction()
         {
             if (SelectedVm == null) return;
-            var addVm = SelectedVm;
-            AllPropertySetVms.Remove(SelectedVm);
-            ChosenPropertySetVms.Add(addVm);
+            var vm = SelectedVm;
+            var fwd = new Action( () => AddPropertySet(vm));
+            var bk = new Action(() => UnAddPropertySet(vm));
+            PageVmBundle.UndoRedoService.Push(
+                    bk, $"Remove {vm.Name}",
+                    fwd, $"Add {vm.Name}");
+        }
+
+        void AddPropertySet(PropertySetVm propertySetVm)
+        {
+            if (propertySetVm == null) return;
+            AllPropertySetVms.Remove(propertySetVm);
+            ChosenPropertySetVms.Add(propertySetVm);
+            _addCommand?.NotifyCanExecuteChanged();
+            _removeCommand?.NotifyCanExecuteChanged();
+            _createSamplesCommand?.NotifyCanExecuteChanged();
+            SampleCount = getSampleCount();
+        }
+
+        void UnAddPropertySet(PropertySetVm propertySetVm)
+        {
+            if (propertySetVm == null) return;
+            ChosenPropertySetVms.Remove(propertySetVm);
+            AllPropertySetVms.Add(propertySetVm);
             _addCommand?.NotifyCanExecuteChanged();
             _removeCommand?.NotifyCanExecuteChanged();
             _createSamplesCommand?.NotifyCanExecuteChanged();
@@ -135,14 +160,15 @@ namespace PlateWorld.ViewModels.Pages
 
         void RemoveAction()
         {
-            var rmVm = SelectedChosenVm;
-            ChosenPropertySetVms.Remove(SelectedChosenVm);
-            AllPropertySetVms.Add(rmVm);
-            _addCommand?.NotifyCanExecuteChanged();
-            _removeCommand?.NotifyCanExecuteChanged();
-            _createSamplesCommand?.NotifyCanExecuteChanged();
-            SampleCount = getSampleCount();
+            if (SelectedChosenVm == null) return;
+            var vm = SelectedChosenVm;
+            var fwd = new Action(() => AddPropertySet(vm));
+            var bk = new Action(() => UnAddPropertySet(vm));
+            PageVmBundle.UndoRedoService.Push(
+                    fwd, $"Add {vm.Name}",
+                    bk, $"Remove {vm.Name}");
         }
+
 
         bool CanRemove()
         {
@@ -159,8 +185,44 @@ namespace PlateWorld.ViewModels.Pages
         {
             get
             {
+                if (_createSamplesCommand == null)
+                {
+                    _createSamplesCommand = new RelayCommand(csRd, CanCreateSamples);
+                }
                 return _createSamplesCommand;
             }
+        }
+
+        void csRd()
+        {
+            var samps = MakeSamples();
+
+            var fwd = new Action( () => csFwd(samps) );
+            var rev = new Action(() => csRev(samps));
+
+            PageVmBundle.UndoRedoService.Push(
+                    rev, $"add {samps.Count()} samples",
+                    fwd, $"remove {samps.Count()} samples");
+
+        }
+
+        async void csFwd(ISample[] samples)
+        {
+            StatusMessage = "Making samples ...";
+
+            PageVmBundle.SampleStore.AddSamples(samples);
+
+            StatusMessage = $"added {samples.Count()} samples";
+        }
+
+        async void csRev(ISample[] samples)
+        {
+            StatusMessage = "Removing samples ...";
+
+            PageVmBundle.SampleStore.RemoveSamples(samples);
+
+            StatusMessage = $"removed {samples.Count()} samples";
+
         }
 
         async void CreateSamplesAction()
@@ -169,8 +231,9 @@ namespace PlateWorld.ViewModels.Pages
 
             StatusMessage = "Making samples ...";
 
+            var samps = MakeSamples();
 
-            await MakeSamples();
+            await MakeSamples2(samps);
 
             StatusMessage = "Done";
             await Task.Delay(1000);
@@ -179,16 +242,24 @@ namespace PlateWorld.ViewModels.Pages
             AllReadyRunning = false;
         }
 
-        async Task MakeSamples()
+        ISample[] MakeSamples()
         {
             var firstDex = PageVmBundle.SampleStore.AllSamples.Count();
             var ps = ChosenPropertySetVms.Select(vm => vm.PropertySet)
-                                         .AllSamples(firstDex);
-            PageVmBundle.SampleStore.AddSamples(ps);
+                                         .AllSamples(firstDex)
+                                         .ToArray();  
+            return ps;
+        }
+
+        async Task MakeSamples2(ISample[] samples)
+        {
+
+            PageVmBundle.SampleStore.AddSamples(samples);
 
             await Task.Delay(1000);
-
         }
+
+
 
         private bool allReadyRunning;
         bool AllReadyRunning 
@@ -224,6 +295,10 @@ namespace PlateWorld.ViewModels.Pages
 
         int getSampleCount()
         {
+            if (ChosenPropertySetVms.Count == 0)
+            {
+                return 0;
+            }
             return ChosenPropertySetVms.Select(vm => vm.PropertyCount)
                                        .Aggregate((a, x) => a * x);
         }
@@ -317,7 +392,9 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.ModalNavigationStore.CurrentViewModel =
                             new NewPlatePageVm(PageVmBundle, NavBackCommand);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Make new Samples", 
+                action, "Go to Make new Plate");
         }
 
         #endregion // NavNewPlateCommand
@@ -332,7 +409,7 @@ namespace PlateWorld.ViewModels.Pages
             {
                 if (_navBackCommand == null)
                 {
-                    _navBackCommand = new RelayCommand(NavBack, () => true);
+                    _navBackCommand = new RelayCommand(NavBackAndPop, () => true);
                 }
                 return _navBackCommand;
             }
@@ -341,9 +418,15 @@ namespace PlateWorld.ViewModels.Pages
         void NavBack()
         {
             PageVmBundle.ModalNavigationStore.CurrentViewModel = null;
-            PageVmBundle.NavigationStore.CurrentViewModel = 
-                new NewSamplesPageVm(PageVmBundle);
+            PageVmBundle.NavigationStore.CurrentViewModel = this;
         }
+
+        void NavBackAndPop()
+        {
+            PageVmBundle.UndoRedoService.PopUndo();
+            NavBack();
+        }
+
 
         #endregion // NavBackCommand
 
@@ -369,7 +452,9 @@ namespace PlateWorld.ViewModels.Pages
                 PageVmBundle.NavigationStore.CurrentViewModel =
                             new AllPlatesPageVm(PageVmBundle, null);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Make new Samples", 
+                action, "Go to All Plates");
         }
 
 
@@ -411,7 +496,9 @@ namespace PlateWorld.ViewModels.Pages
                  PageVmBundle.NavigationStore.CurrentViewModel =
                         new AllSamplesPageVm(PageVmBundle);
 
-            PageVmBundle.UndoRedoService.Push(NavBack, action);
+            PageVmBundle.UndoRedoService.Push(
+                NavBack, "Go to Make new Samples", 
+                action, "Go to All Samples");
         }
 
         #endregion // NavAllSamplesCommand

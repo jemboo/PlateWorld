@@ -36,7 +36,7 @@ namespace PlateWorld.DataStore
             get { return sampleDict.Values; }
         }
 
-        public bool[] RemovePlates(ISample[] samples)
+        public bool[] RemoveSamples(ISample[] samples)
         {
             var res = samples.Select(
                 sample => sampleDict.Remove(sample.Id));

@@ -114,12 +114,13 @@ namespace PlateWorld.ViewModels.DragDrop
                         var srcSampleVm = obj2Insert as SampleVm;
                         if((srcSampleVm != null) && (destWellVm != null))
                         {
-                            srcSampleVm.WellCoords = destWellVm.Well.WellCoords;
-                            srcSampleVm.PlateName = destWellVm.PlateName;
-                            destWellVm.SampleVm = srcSampleVm;
-                            destWellVm.IsSelected2 = true;
-                            srcSampleVm.Update();
-                            destWellVm.Update(destWellVm, null);
+                            //srcSampleVm.WellCoords = destWellVm.Well.WellCoords;
+                            //srcSampleVm.PlateName = destWellVm.PlateName;
+                            //destWellVm.SampleVm = srcSampleVm;
+                            destWellVm.IsSelected = true;
+                            //srcSampleVm.Update();
+                            //destWellVm.Update(destWellVm, null);
+                            destWellVm.Updato(null, destWellVm, srcSampleVm);
                             return;
                         }
                         var srcWellVm = obj2Insert as WellVm;
@@ -130,13 +131,9 @@ namespace PlateWorld.ViewModels.DragDrop
                             srcWellVm.SampleVm.PlateName = destWellVm.PlateName;
                             destWellVm.SampleVm = srcWellVm.SampleVm;
                             srcWellVm.SampleVm = null;
-                            destWellVm.IsSelected2 = true;
-                            srcWellVm.Update(srcWellVm, null);
-                            destWellVm.Update(destWellVm, null);
+                            destWellVm.IsSelected = true;
                             return;
                         }
-
-
                     }
                 }
 
@@ -184,7 +181,7 @@ namespace PlateWorld.ViewModels.DragDrop
                 wellVms.Add(wvm);
                 if (wvm != null)
                 {
-                    wvm.IsSelected2 = false;
+                    wvm.IsSelected = false;
                 }
             }
             var selWellVm = wellVms[dropInfo.InsertIndex];
@@ -200,7 +197,7 @@ namespace PlateWorld.ViewModels.DragDrop
             {
                 return false;
             }
-            selWellVm.IsSelected2 = true;
+            selWellVm.IsSelected = true;
             return true;
         }
     }

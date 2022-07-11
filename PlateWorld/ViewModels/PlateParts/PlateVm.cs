@@ -1,7 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using PlateWorld.Models.SamplePlate;
+using PlateWorld.Mvvm.Commands;
 using PlateWorld.ViewModels.DragDrop;
-using PlateWorld.ViewModels.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,15 +9,18 @@ using System.Windows.Controls;
 
 namespace PlateWorld.ViewModels.PlateParts
 {
-    public class PlateVm : ObservableObject, IUpdater<WellVm>
+    public class PlateVm : ObservableObject
     {
         public PlateVm(IPlate plate,
-                       DataStore.PlateStore plateStore)
+                       DataStore.PlateStore plateStore,
+                       UndoRedoService undoRedoService)
         {
             Plate = plate ?? throw new Exception("Plate was null");
             PlateStore = plateStore;
+            UndoRedoService = undoRedoService;
+
             _name = plate.Name;
-            _validationMessage = string.Empty;
+            _validationResult = string.Empty;
 
             WellVms = new ObservableCollection<WellVm>();
             ResetWellVms();
@@ -26,17 +29,44 @@ namespace PlateWorld.ViewModels.PlateParts
             VerticalMarginVm = new PlateMarginVm(Orientation.Vertical, Plate.RowCount);
         }
 
+        UndoRedoService UndoRedoService { get; set; }
+
+        #region AddSampleToWell
+
+        void AddSampleToWell(WellVm oldWellVm, WellVm newWellVm, SampleVm sampleVm)
+        {
+            Action redoAction = () => MoveSample(oldWellVm, newWellVm, sampleVm);
+            Action undoAction = () => MoveSample(newWellVm, oldWellVm, sampleVm);
+            UndoRedoService.Push(
+                undoAction, $"Move sample",
+                redoAction, $"Unmove sample");
+        }
+
+        void MoveSample(WellVm oldWellVm, WellVm newWellVm, SampleVm sampleVm)
+        {
+            if (oldWellVm != null)
+            {
+                oldWellVm.SampleVm = null;
+                sampleVm.WellCoords = null;
+                sampleVm.PlateName = String.Empty;
+            }
+            if (newWellVm != null)
+            {
+                newWellVm.SampleVm = sampleVm;
+                sampleVm.WellCoords = newWellVm.Well.WellCoords;
+                sampleVm.PlateName = newWellVm.PlateName;
+            }
+            CheckForChanges();
+        }
+
+        #endregion
         void ResetWellVms()
         {
             WellVms.Clear();
             foreach (var w in Plate.Wells)
             {
-                WellVms.Add(new WellVm(w, Plate.Name, this));
+                WellVms.Add(new WellVm(w, Plate.Name, AddSampleToWell));
             }
-        }
-
-        public void Update(WellVm theOld, WellVm theNew)
-        {
             CheckForChanges();
         }
 
@@ -76,23 +106,22 @@ namespace PlateWorld.ViewModels.PlateParts
 
         public void UndoChanges()
         {
-            Name = Plate.Name;
             ResetWellVms();
+            Name = Plate.Name;
+            CheckForChanges();
         }
 
-        public static PlateVm Empty =>
-            new PlateVm(Models.SamplePlate.Plate.Empty, null);
-
+        public static PlateVm Empty  { get; }
+                    = new PlateVm(Models.SamplePlate.Plate.Empty, null, null);
 
         #region DragDrop
-        public PlateDragHandler PlateDragHandler { get; set; }
+        public PlateDragHandler PlateDragHandler { get; }
             = new PlateDragHandler();
 
-        public PlateDropHandler PlateDropHandler { get; set; }
+        public PlateDropHandler PlateDropHandler { get; }
             = new PlateDropHandler();
 
         #endregion
-
 
         public void SaveChanges()
         {
@@ -101,46 +130,47 @@ namespace PlateWorld.ViewModels.PlateParts
             PlateStore.RemovePlates(new[] { Plate });
             PlateStore.AddPlates(new[] { newPlate });
             Plate = newPlate;
+            CheckForChanges();
         }
 
         void ValidateNameChange()
         {
             if (Plate.Name == Name)
             {
-                ValidationMessage = String.Empty;
+                ValidationResult = String.Empty;
                 return;
             }
             if (PlateStore == null)
             {
-                ValidationMessage = String.Empty;
+                ValidationResult = String.Empty;
                 return;
             }
             if (PlateStore.ContainsPlateName(Name))
             {
-                ValidationMessage = $"Plate name is already in use";
+                ValidationResult = $"Plate name is already in use";
                 return;
             }
         }
 
 
-        private string _validationMessage;
-        public string ValidationMessage
+        private string _validationResult;
+        public string ValidationResult
         {
-            get => _validationMessage;
+            get => _validationResult;
             set
             {
-                SetProperty(ref _validationMessage, value);
+                SetProperty(ref _validationResult, value);
             }
         }
-
     }
 
     public static class PlateVmExt
     {
         public static PlateVm ToPlateVm(this IPlate plate,
-                                        DataStore.PlateStore plateStore)
+                                        DataStore.PlateStore plateStore,
+                                        UndoRedoService undoRedoService)
         {
-            return new PlateVm(plate, plateStore);
+            return new PlateVm(plate, plateStore, undoRedoService);
         }
 
         public static int GoodZoomLevel(this PlateVm vm)
@@ -155,7 +185,7 @@ namespace PlateWorld.ViewModels.PlateParts
 
     public class PlateVmD : PlateVm
     {
-        public PlateVmD() : base(TestPlate(), null)
+        public PlateVmD() : base(TestPlate(), null, null)
         {
         }
         static Plate TestPlate()
